@@ -1,0 +1,448 @@
+@import 'tailwindcss';
+
+/* ==========================================================================
+   L'ALLER RETOUR — DESIGN SYSTEM
+   Steakhouse premium · bistrot français · cave à vin
+   ========================================================================== */
+
+@theme {
+  /* --- Noirs & bruns : la salle, le bois, le cuir --- */
+  --color-noir: #0a0908;
+  --color-charbon: #121010;
+  --color-suie: #191513;
+  --color-brun: #231914;
+  --color-brun-clair: #35271f;
+  --color-cuir: #4a3527;
+
+  /* --- Crèmes : la nappe, le papier de la carte --- */
+  --color-creme: #f4ede2;
+  --color-ivoire: #e6dccc;
+  --color-sable: #b7a992;
+  --color-cendre: #8a7f70;
+
+  /* --- Rouges : le vin, la braise (usage parcimonieux) --- */
+  --color-bordeaux: #5e0f1c;
+  --color-vin: #7d1626;
+  --color-braise: #a12c2c;
+
+  /* --- Or : hairlines et accents très discrets --- */
+  --color-or: #b8974f;
+  --color-or-clair: #d6bb7e;
+
+  /* --- Typographie --- */
+  --font-display: 'Cormorant Garamond', 'Times New Roman', ui-serif, Georgia, serif;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* --- Rythme & courbes --- */
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-inout: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* --- Ombres chaudes (jamais de gris bleuté) --- */
+  --shadow-warm: 0 24px 60px -24px rgb(0 0 0 / 0.85);
+  --shadow-lift: 0 32px 80px -30px rgb(0 0 0 / 0.95);
+}
+
+/* ==========================================================================
+   THÈME CLAIR / SOMBRE
+   ---------------------------------------------------------------------------
+   Tailwind v4 compile chaque utilitaire de couleur en référence à la
+   variable CSS (`.bg-noir { background-color: var(--color-noir) }`), jamais
+   en valeur littérale. Il suffit donc de redéfinir ces variables pour que
+   tout le site — déjà écrit avec ces utilitaires — change d'apparence.
+
+   Le mode sombre est la valeur par défaut (déjà posée sur <html> par
+   `index.html`, sans script bloquant nécessaire). `[data-theme="dark"]`
+   est tout de même redéclaré explicitement : cela permet à une section
+   photographique (Hero, bandeaux d'ouverture, visionneuse) de se figer en
+   sombre — `data-theme="dark"` posé directement sur son conteneur — même
+   quand le site est en thème clair, car un texte clair sur une photo sombre
+   doit toujours rester lisible, quel que soit le thème choisi.
+   ========================================================================== */
+
+[data-theme='dark'] {
+  --color-noir: #0a0908;
+  --color-charbon: #121010;
+  --color-suie: #191513;
+  --color-brun: #231914;
+  --color-brun-clair: #35271f;
+  --color-cuir: #4a3527;
+
+  --color-creme: #f4ede2;
+  --color-ivoire: #e6dccc;
+  --color-sable: #b7a992;
+  --color-cendre: #8a7f70;
+
+  --color-bordeaux: #5e0f1c;
+  --color-vin: #7d1626;
+  --color-braise: #a12c2c;
+
+  --color-or: #b8974f;
+  --color-or-clair: #d6bb7e;
+
+  color-scheme: dark;
+}
+
+[data-theme='light'] {
+  /* Papier ivoire plutôt que blanc pur : le site reste chaleureux de jour. */
+  --color-noir: #f7f1e4;
+  --color-charbon: #efe6d2;
+  --color-suie: #e6dabf;
+  --color-brun: #d9c6a0;
+  --color-brun-clair: #b99b68;
+  --color-cuir: #7c5a32;
+
+  /* Bruns très foncés en lieu et place des crèmes : ce sont les tokens de
+     texte, dont le rôle s'inverse naturellement avec le fond. */
+  --color-creme: #1c160f;
+  --color-ivoire: #2e241a;
+  --color-sable: #5a4b34;
+  --color-cendre: #71604a;
+
+  /* Le vin et l'or restent des couleurs de marque, quasi inchangées ;
+     l'or est légèrement assombri pour rester lisible sur fond clair. */
+  --color-bordeaux: #5e0f1c;
+  --color-vin: #7d1626;
+  --color-braise: #9c2a2a;
+  --color-or: #86611f;
+  --color-or-clair: #6b4c18;
+
+  color-scheme: light;
+}
+
+/* ==========================================================================
+   BASE
+   ========================================================================== */
+
+@layer base {
+  * {
+    border-color: color-mix(in oklab, var(--color-or) 14%, transparent);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: 6rem;
+  }
+
+  body {
+    background-color: var(--color-noir);
+    color: var(--color-ivoire);
+    font-family: var(--font-sans);
+    font-weight: 300;
+    font-size: 1rem;
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+    transition:
+      background-color 0.4s var(--ease-soft),
+      color 0.4s var(--ease-soft);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    color: var(--color-creme);
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background-color: var(--color-vin);
+    /* Toujours clair : `--color-vin` reste un rouge mi-sombre dans les deux
+       thèmes, `--color-creme` s'inverserait en texte foncé en thème clair. */
+    color: #f4ede2;
+  }
+
+  /* Focus visible : anneau doré, jamais supprimé */
+  :focus-visible {
+    outline: 2px solid var(--color-or-clair);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  /* Barre de défilement discrète */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-noir);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-brun-clair);
+    border-radius: 999px;
+    border: 3px solid var(--color-noir);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-cuir);
+  }
+
+  /* Champs de formulaire : héritage typographique */
+  input,
+  select,
+  textarea,
+  button {
+    font: inherit;
+    color: inherit;
+  }
+
+  /* Retire la croix native de la recherche Webkit (on fournit la nôtre) */
+  input[type='search']::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* ==========================================================================
+   UTILITAIRES MAISON
+   ========================================================================== */
+
+/* Conteneur éditorial */
+@utility u-container {
+  width: 100%;
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+  max-width: 84rem;
+
+  @media (min-width: 640px) {
+    padding-inline: 2rem;
+  }
+  @media (min-width: 1024px) {
+    padding-inline: 3rem;
+  }
+}
+
+@utility u-container-narrow {
+  width: 100%;
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+  max-width: 56rem;
+
+  @media (min-width: 640px) {
+    padding-inline: 2rem;
+  }
+}
+
+/* Sur-titre : petites capitales très espacées, or discret */
+@utility eyebrow {
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--color-or);
+  line-height: 1.4;
+}
+
+/* Grain photographique : donne de la matière aux aplats sombres */
+@utility grain {
+  position: relative;
+  isolation: isolate;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.32;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+  }
+}
+
+/* Ligne de conduite pointillée entre un plat et son prix */
+@utility dot-leader {
+  flex: 1 1 auto;
+  min-width: 1.5rem;
+  margin-inline: 0.75rem;
+  transform: translateY(-0.3em);
+  border-bottom: 1px dotted color-mix(in oklab, var(--color-sable) 38%, transparent);
+}
+
+/* Lien texte avec soulignement animé */
+@utility link-quiet {
+  position: relative;
+  display: inline-block;
+  transition: color 0.35s var(--ease-soft);
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    height: 1px;
+    width: 100%;
+    background-color: currentColor;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.45s var(--ease-soft);
+  }
+
+  &:hover::after,
+  &:focus-visible::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+}
+
+/* Masque de lisibilité au-dessus des photos */
+@utility scrim {
+  background-image: linear-gradient(
+    to top,
+    rgb(10 9 8 / 0.94) 0%,
+    rgb(10 9 8 / 0.72) 28%,
+    rgb(10 9 8 / 0.28) 62%,
+    rgb(10 9 8 / 0.42) 100%
+  );
+}
+
+/* Chiffres alignés pour les prix */
+@utility tnum {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* Lien d'évitement clavier */
+@utility skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -100%;
+  z-index: 100;
+  background-color: var(--color-creme);
+  color: var(--color-noir);
+  padding: 0.75rem 1.25rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  transition: top 0.3s var(--ease-soft);
+
+  &:focus {
+    top: 1rem;
+  }
+}
+
+/* ==========================================================================
+   ANIMATIONS — discrètes, jamais gratuites
+   ========================================================================== */
+
+@keyframes ar-fade-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 24px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes ar-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes ar-rule-in {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes ar-drift {
+  from {
+    transform: scale(1.06) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.12) translate3d(0, -1.5%, 0);
+  }
+}
+
+@keyframes ar-panel-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -8px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Révélation au défilement — pilotée par IntersectionObserver.
+   L'élément est masqué tant qu'il n'a pas reçu data-revealed="true". */
+[data-reveal] {
+  opacity: 0;
+  will-change: opacity, transform;
+}
+
+[data-reveal='up'] {
+  transform: translate3d(0, 28px, 0);
+}
+[data-reveal='fade'] {
+  transform: none;
+}
+[data-reveal='left'] {
+  transform: translate3d(-28px, 0, 0);
+}
+[data-reveal='right'] {
+  transform: translate3d(28px, 0, 0);
+}
+
+[data-reveal][data-revealed='true'] {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  transition:
+    opacity 0.9s var(--ease-soft),
+    transform 0.9s var(--ease-soft);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+/* Dérive très lente de l'image du hero */
+.ar-drift {
+  animation: ar-drift 24s var(--ease-inout) infinite alternate;
+}
+
+/* ==========================================================================
+   ACCESSIBILITÉ — respect strict de prefers-reduced-motion
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
