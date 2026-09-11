@@ -90,7 +90,9 @@ function categoryVarName(category: MenuCategoryId): string {
 /* -------------------------------------------------------------------------- */
 
 function importIdentFromFile(file: string): string {
-  const base = file.replace(/\.[^.]+$/, '');
+  // Retire l'horodatage ajouté par l'envoi depuis le tableau de bord
+  // (`onglet-1789145695440.jpg` → `onglet`), pour un nom de variable lisible.
+  const base = file.replace(/\.[^.]+$/, '').replace(/-\d{6,}$/, '');
   return `${toCamelCase(base)}Photo`;
 }
 

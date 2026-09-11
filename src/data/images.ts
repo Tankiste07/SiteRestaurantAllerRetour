@@ -7,9 +7,11 @@
  * prochaine publication.
  */
 
+import escargotsPhoto from '@/assets/photos/escargots-1789145967123.jpg';
 import tartareCharolaisPhoto from '@/assets/photos/tartare-charolais.jpg';
 import ongletPhoto from '@/assets/photos/onglet.jpg';
 import noixEntrecoteArgentinePhoto from '@/assets/photos/noix-entrecote-argentine.jpg';
+import filetPhoto from '@/assets/photos/filet-1789145695440.jpg';
 import coteDeBoeufPhoto from '@/assets/photos/cote-de-boeuf.jpg';
 import fauxFiletPhoto from '@/assets/photos/faux-filet.jpg';
 
@@ -27,7 +29,12 @@ export const IMAGES = {
   caveTeaser: { alt: 'Rangées de bouteilles dans la cave', tone: 'cave', motif: 'bouteille' },
 
   /* --- Entrées --- */
-  escargots: { alt: 'Escargots de Bourgogne', tone: 'bois', motif: 'escargot' },
+  escargots: {
+    src: escargotsPhoto,
+    alt: 'Escargots de Bourgogne',
+    tone: 'bois',
+    motif: 'escargot',
+  },
   boudin: { alt: 'Boudins béarnais et ses pommes', tone: 'bois', motif: 'assiette' },
   pate: { alt: 'Pâté de campagne', tone: 'bois', motif: 'assiette' },
   osAMoelle: { alt: 'Os à moelle fendu, pain grillé et fleur de sel', tone: 'bois', motif: 'os' },
@@ -54,7 +61,12 @@ export const IMAGES = {
     tone: 'braise',
     motif: 'steak',
   },
-  filet: { alt: 'Filet de bœuf', tone: 'braise', motif: 'steak' },
+  filet: {
+    src: filetPhoto,
+    alt: 'Filet de bœuf grillé, frites, salade et sauces',
+    tone: 'braise',
+    motif: 'steak',
+  },
   coteDeBoeuf: {
     src: coteDeBoeufPhoto,
     alt: 'Côte de bœuf pour deux personnes, tranchée, servie avec salade et frites',

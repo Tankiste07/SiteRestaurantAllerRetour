@@ -1,10 +1,9 @@
 import { Link } from 'react-router-dom';
 import { MapPin, Phone, Mail } from 'lucide-react';
 import { LEGAL_NAV } from '@/data/navigation';
-import { CELLAR, CONTACT, PLACEHOLDERS, SOCIAL_LINKS } from '@/data/site';
+import { CELLAR, CONTACT, OPENING_HOURS, PLACEHOLDERS } from '@/data/site';
 import { ReservationButton } from '../ReservationButton';
 import { Ornament } from '../ui/Ornament';
-import { SocialIcon } from '../ui/SocialIcon';
 import { Logo } from './Logo';
 
 const FOOTER_LINKS = [
@@ -17,8 +16,7 @@ const FOOTER_LINKS = [
 ];
 
 export function Footer() {
-  /* Seuls les réseaux dont l'URL est réellement connue sont affichés. */
-  const socials = SOCIAL_LINKS.filter((link) => Boolean(link.url));
+  const knownHours = OPENING_HOURS.filter((day) => day.hours || day.closed);
 
   return (
     <footer className="grain relative border-t border-or/12 bg-charbon">
@@ -40,9 +38,9 @@ export function Footer() {
         <Ornament className="my-12 md:my-14" />
 
         {/* ---------------- Colonnes ------------------------------------- */}
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-10 sm:grid-cols-3">
           {/* Navigation */}
-          <nav aria-label="Pied de page" className="sm:col-span-1">
+          <nav aria-label="Pied de page">
             <h2 className="eyebrow">Le site</h2>
             <ul className="mt-5 space-y-3">
               {FOOTER_LINKS.map((item) => (
@@ -100,33 +98,17 @@ export function Footer() {
           {/* Horaires */}
           <div>
             <h2 className="eyebrow">Horaires</h2>
-            <p className="mt-5 text-sm text-cendre">{PLACEHOLDERS.hours}</p>
-            {/* Les horaires réels s'afficheront ici dès qu'ils seront
-                renseignés dans `src/data/site.ts` (OPENING_HOURS). */}
-          </div>
-
-          {/* Suivez-nous */}
-          <div>
-            <h2 className="eyebrow">Suivez-nous</h2>
-            {socials.length > 0 ? (
-              <ul className="mt-5 flex gap-3">
-                {socials.map((link) => (
-                  <li key={link.label}>
-                    <a
-                      href={link.url as string}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={link.label}
-                      className="flex size-11 items-center justify-center border border-or/25 text-ivoire/80 transition-colors duration-400 hover:border-or/60 hover:text-or-clair"
-                    >
-                      <SocialIcon name={link.icon} />
-                    </a>
+            {knownHours.length > 0 ? (
+              <ul className="mt-5 space-y-2.5 text-sm">
+                {knownHours.map((day) => (
+                  <li key={day.day}>
+                    <p className="text-sable">{day.day}</p>
+                    <p className="tnum text-ivoire/80">{day.closed ? 'Fermé' : day.hours}</p>
                   </li>
                 ))}
               </ul>
             ) : (
-              /* Aucune URL de réseau social n'a été communiquée : rien n'est inventé. */
-              <p className="mt-5 text-sm text-cendre">[RÉSEAUX SOCIAUX]</p>
+              <p className="mt-5 text-sm text-cendre">{PLACEHOLDERS.hours}</p>
             )}
           </div>
         </div>

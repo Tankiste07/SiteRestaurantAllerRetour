@@ -5,7 +5,8 @@
   "description": "Site du restaurant L'Aller Retour — viandes rouges & vins",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently -n site,api,dash -c cyan,blue,magenta \"npm:dev:site\" \"npm:dashboard:api\" \"npm:dashboard:ui\"",
+    "dev:site": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",

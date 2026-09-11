@@ -58,7 +58,13 @@ export default function Privacy() {
 
       <LegalBlock title="Responsable du traitement">
         <p className="text-cendre">[RAISON SOCIALE]</p>
-        <p className="text-cendre">{PLACEHOLDERS.address}</p>
+        {CONTACT.address.street ? (
+          <p>
+            {CONTACT.address.street}, {CONTACT.address.postalCode} {CONTACT.address.city}
+          </p>
+        ) : (
+          <p className="text-cendre">{PLACEHOLDERS.address}</p>
+        )}
       </LegalBlock>
     </LegalLayout>
   );

@@ -10,12 +10,21 @@ React 19 · Vite 8 · TypeScript · Tailwind CSS 4 · React Router 7 · Lucide
 
 ```bash
 npm install
-npm run dev        # http://localhost:5173
+npm run dev
 ```
+
+Une seule commande démarre tout, en parallèle :
+
+| Service                                       | Port |
+| ---------------------------------------------- | ---- |
+| Site public (`npm run dev:site` seul si besoin) | 5173 |
+| API du tableau de bord                          | 4310 |
+| Interface du tableau de bord                    | 5174 |
 
 | Commande          | Rôle                                                        |
 | ----------------- | ----------------------------------------------------------- |
-| `npm run dev`     | Serveur de développement                                     |
+| `npm run dev`     | Site + API + tableau de bord ensemble (usage courant)        |
+| `npm run dev:site`| Site public seul, sans l'API ni le tableau de bord            |
 | `npm run build`   | Vérification TypeScript + build de production dans `dist/`   |
 | `npm run preview` | Sert le build de production                                  |
 | `npm run lint`    | Analyse statique (oxlint)                                    |
@@ -28,12 +37,11 @@ npm run dev        # http://localhost:5173
 
 Un tableau de bord permet de gérer **la carte et les images** sans toucher au
 code, avec une vraie base de données locale (`server/database.json`).
+Il démarre automatiquement avec `npm run dev` (ci-dessus) — ouvrir
+<http://localhost:5174/dashboard.html>. Pour le lancer seul, sans le site
+public : `npm run dashboard`.
 
-```bash
-npm run dashboard   # démarre l'API (4310) et l'interface (5174) ensemble
-```
-
-Ouvre <http://localhost:5174/dashboard.html>. Trois sections :
+Trois sections :
 
 - **La Carte** — ajouter, modifier, réordonner ou supprimer un plat de
   chaque catégorie (entrées, viandes, non-carnivores, desserts).
@@ -44,12 +52,32 @@ Ouvre <http://localhost:5174/dashboard.html>. Trois sections :
   un clic le commit + push sur GitHub. Seuls `src/data/menu.ts`,
   `src/data/images.ts` et `src/assets/photos/` sont concernés.
 
+### Où va un changement fait dans le tableau de bord ?
+
+Trois étapes, pas automatiquement enchaînées :
+
+1. **Ajouter/modifier/supprimer dans le tableau de bord** → enregistré
+   immédiatement dans la base locale (`server/database.json`). Visible dans
+   le tableau de bord, **pas encore sur le site**.
+2. **Ouvrir l'onglet « Publier »** → `src/data/menu.ts` et
+   `src/data/images.ts` sont régénérés sur le disque à partir de la base
+   (dès l'affichage de l'onglet, avant même de cliquer sur un bouton). Le
+   site ouvert sur `npm run dev` se met alors à jour tout seul (rechargement
+   à chaud) : **c'est le moment où le changement devient visible**.
+3. **Bouton « Publier sur GitHub »** → envoie ce changement sur le dépôt
+   distant (commit + push), pour ne pas le perdre.
+
+Le site n'étant pas encore hébergé en ligne, l'étape 3 ne rend rien visible
+publiquement pour l'instant : elle sauvegarde seulement le travail sur
+GitHub. Ce qui est visible aujourd'hui, c'est ce que montre `npm run dev`
+(ou `npm run build` + `npm run preview`).
+
 **Le tableau de bord est un outil local, jamais déployé** : `dashboard.html`
 n'est pas inclus dans `npm run build`, et son serveur (`server/`) ne tourne
-que pendant que `npm run dashboard` est actif sur ce PC. Le site public
-continue de lire `src/data/menu.ts` et `src/data/images.ts` exactement comme
-avant — ces deux fichiers sont désormais **générés** par le tableau de bord
-(un en-tête l'indique dans chaque fichier) plutôt qu'édités à la main.
+que pendant que `npm run dev` (ou `npm run dashboard`) est actif sur ce PC.
+`src/data/menu.ts` et `src/data/images.ts` sont désormais **générés** par le
+tableau de bord (un en-tête l'indique dans chaque fichier) plutôt qu'édités
+à la main — le reste du site les lit exactement comme avant.
 
 Si le site est mis en ligne un jour, cette base locale pourra être migrée
 vers une base hébergée (Supabase, par exemple) sans changer l'interface du
@@ -57,7 +85,7 @@ tableau de bord — seule la couche d'accès aux données serait remplacée.
 
 | Commande                 | Rôle                                              |
 | ------------------------ | -------------------------------------------------- |
-| `npm run dashboard`      | API + interface ensemble (usage courant)            |
+| `npm run dashboard`      | API + interface du tableau de bord, sans le site    |
 | `npm run dashboard:api`  | API seule (port 4310)                               |
 | `npm run dashboard:ui`   | Interface seule (port 5174)                         |
 | `npm run check:dashboard`| Vérification TypeScript de l'interface              |

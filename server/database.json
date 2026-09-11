@@ -61,7 +61,7 @@
       "alt": "Escargots de Bourgogne",
       "tone": "bois",
       "motif": "escargot",
-      "file": null,
+      "file": "escargots-1789145967123.jpg",
       "protected": true
     },
     {
@@ -138,10 +138,10 @@
     },
     {
       "key": "filet",
-      "alt": "Filet de bœuf",
+      "alt": "Filet de bœuf grillé, frites, salade et sauces",
       "tone": "braise",
       "motif": "steak",
-      "file": null,
+      "file": "filet-1789145695440.jpg",
       "protected": true
     },
     {

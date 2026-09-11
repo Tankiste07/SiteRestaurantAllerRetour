@@ -22,7 +22,13 @@ export default function Legal() {
         </p>
         <p className="text-cendre">[RAISON SOCIALE]</p>
         <p className="text-cendre">[FORME JURIDIQUE — CAPITAL SOCIAL]</p>
-        <p className="text-cendre">{PLACEHOLDERS.address}</p>
+        {CONTACT.address.street ? (
+          <p>
+            {CONTACT.address.street}, {CONTACT.address.postalCode} {CONTACT.address.city}
+          </p>
+        ) : (
+          <p className="text-cendre">{PLACEHOLDERS.address}</p>
+        )}
         <p className="text-cendre">[SIRET] — [RCS] — [N° TVA INTRACOMMUNAUTAIRE]</p>
         <p>
           Téléphone :{' '}
