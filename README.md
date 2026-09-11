@@ -24,6 +24,47 @@ npm run dev        # http://localhost:5173
 
 ---
 
+## Tableau de bord (local)
+
+Un tableau de bord permet de gérer **la carte et les images** sans toucher au
+code, avec une vraie base de données locale (`server/database.json`).
+
+```bash
+npm run dashboard   # démarre l'API (4310) et l'interface (5174) ensemble
+```
+
+Ouvre <http://localhost:5174/dashboard.html>. Trois sections :
+
+- **La Carte** — ajouter, modifier, réordonner ou supprimer un plat de
+  chaque catégorie (entrées, viandes, non-carnivores, desserts).
+- **Images** — téléverser une photo pour n'importe quel emplacement du site
+  (plats, pages d'ouverture, galerie), modifier le texte alternatif ; les
+  photos envoyées sont automatiquement compressées en JPEG.
+- **Publier** — prévisualise les changements (diff inclus), puis effectue en
+  un clic le commit + push sur GitHub. Seuls `src/data/menu.ts`,
+  `src/data/images.ts` et `src/assets/photos/` sont concernés.
+
+**Le tableau de bord est un outil local, jamais déployé** : `dashboard.html`
+n'est pas inclus dans `npm run build`, et son serveur (`server/`) ne tourne
+que pendant que `npm run dashboard` est actif sur ce PC. Le site public
+continue de lire `src/data/menu.ts` et `src/data/images.ts` exactement comme
+avant — ces deux fichiers sont désormais **générés** par le tableau de bord
+(un en-tête l'indique dans chaque fichier) plutôt qu'édités à la main.
+
+Si le site est mis en ligne un jour, cette base locale pourra être migrée
+vers une base hébergée (Supabase, par exemple) sans changer l'interface du
+tableau de bord — seule la couche d'accès aux données serait remplacée.
+
+| Commande                 | Rôle                                              |
+| ------------------------ | -------------------------------------------------- |
+| `npm run dashboard`      | API + interface ensemble (usage courant)            |
+| `npm run dashboard:api`  | API seule (port 4310)                               |
+| `npm run dashboard:ui`   | Interface seule (port 5174)                         |
+| `npm run check:dashboard`| Vérification TypeScript de l'interface              |
+| `npm run check:server`   | Vérification TypeScript de l'API                    |
+
+---
+
 ## ⚠️ Ce qu'il reste à renseigner
 
 Le site a été construit **sans jamais inventer d'information**. Tout ce qui
@@ -97,26 +138,17 @@ n'apparaît pas. Le compteur de références affiche le nombre réel, jamais un
 chiffre décoratif. L'affichage est paginé (24 bouteilles à la fois), ce qui
 permet de monter à plusieurs milliers de références sans ralentissement.
 
-### 4. Les photographies — `src/data/images.ts`
+### 4. Les photographies — via le tableau de bord
 
-La photo de la **côte de bœuf** est branchée (`src/assets/photos/cote-de-boeuf.jpg`,
-utilisée sur la carte et dans la galerie). Les autres emplacements affichent
-encore un **visuel de substitution généré** (dégradés chauds, grain, gravure
-au trait) : il ne dépend d'aucun réseau et ne peut jamais casser.
+Cinq photos sont déjà branchées (tartare, onglet, noix d'entrecôte, côte de
+bœuf, faux-filet). Les autres emplacements affichent encore un **visuel de
+substitution généré** (dégradés chauds, grain, gravure au trait) : il ne
+dépend d'aucun réseau et ne peut jamais casser.
 
-Pour brancher une nouvelle photo, même principe :
-
-```ts
-import onglet from '@/assets/photos/onglet.jpg';
-
-export const IMAGES = {
-  onglet: { src: onglet, alt: 'Onglet de bœuf irlandais…', tone: 'braise', motif: 'steak' },
-  // …
-};
-```
-
-Une URL distante fonctionne aussi : `<SmartImage>` retombe seul sur le visuel
-de substitution si le chargement échoue.
+Pour brancher une nouvelle photo, la façon recommandée est l'onglet
+**Images** du [tableau de bord](#tableau-de-bord-local) (glisser-déposer,
+compression automatique). `src/data/images.ts` est désormais **généré** — il
+ne se modifie plus à la main.
 
 ### 5. Mentions légales
 
@@ -146,12 +178,17 @@ src/
 ├── hooks/           useInView · useParallax · useSeo · useLockBodyScroll · useWineCatalog
 ├── utils/           wine.ts (moteur de filtres) · format.ts · schema.ts · cn.ts
 ├── assets/photos/   ← déposer ici les photographies du restaurant
+├── dashboard/       Interface du tableau de bord (jamais dans le build public)
 └── index.css        Design system complet (couleurs, typographie, animations)
+
+server/               API + base locale (lowdb) du tableau de bord
 ```
 
 **Le contenu est entièrement séparé des composants** : la carte, la cave, les
 coordonnées et les images vivent dans `src/data/`. Modifier un prix ou ajouter
-un plat ne demande jamais de toucher au code d'affichage.
+un plat ne demande jamais de toucher au code d'affichage. `menu.ts` et
+`images.ts` sont désormais générés par le tableau de bord (voir plus haut) ;
+`menu.types.ts` et `images.types.ts` portent les types, stables.
 
 ### Routes
 

@@ -10,7 +10,12 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "smoke": "vite build --config scripts/vite.smoke.config.ts && node scripts/smoke.mjs",
-    "check": "tsc -b && oxlint && vite build"
+    "check": "tsc -b && oxlint && vite build",
+    "dashboard:api": "tsx watch server/index.ts",
+    "dashboard:ui": "vite --config vite.dashboard.config.ts",
+    "dashboard": "concurrently -n api,ui -c blue,magenta \"npm:dashboard:api\" \"npm:dashboard:ui\"",
+    "check:server": "tsc -p tsconfig.server.json --noEmit",
+    "check:dashboard": "tsc -p tsconfig.dashboard.json --noEmit"
   },
   "dependencies": {
     "lucide-react": "^1.42.0",
@@ -20,12 +25,21 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/multer": "^2.2.0",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "@vitejs/plugin-react": "^6.1.0",
+    "concurrently": "^10.0.5",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "lowdb": "^7.0.1",
+    "multer": "^2.3.0",
     "oxlint": "^1.79.0",
     "tailwindcss": "^4.3.3",
+    "tsx": "^4.23.13",
     "typescript": "~6.0.2",
     "vite": "^8.2.2"
   }

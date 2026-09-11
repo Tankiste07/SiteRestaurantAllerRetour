@@ -1,70 +1,24 @@
 /**
  * LA CARTE — L'ALLER RETOUR
  * ---------------------------------------------------------------------------
- * Source de vérité unique pour tous les plats du site.
- *
- * RÈGLE : ne contient QUE les informations communiquées par le restaurant.
- * Aucune description d'origine, de cuisson ou de préparation n'a été ajoutée.
- * Les champs absents sont volontairement absents.
+ * ⚠️ FICHIER GÉNÉRÉ — ne pas modifier à la main.
+ * Généré par le tableau de bord (`npm run dashboard`) à partir de
+ * `server/database.json`. Toute modification directe sera écrasée à la
+ * prochaine publication.
  */
 
-import type { ImageKey } from './images';
-
-export type MenuCategoryId = 'entrees' | 'viandes' | 'non-carnivores' | 'desserts';
-
-/** Un plat proposé en plusieurs grammages / formats. */
-export interface PriceVariant {
-  /** Ex. « 250 g » */
-  label: string;
-  price: number;
-}
-
-/** Supplément proposé avec un plat. */
-export interface MenuOption {
-  label: string;
-  price: number;
-}
-
-export type MenuTag = 'SANS GLUTEN';
-
-export interface MenuItem {
-  id: string;
-  name: string;
-  /** Précision fournie par le restaurant (accompagnement, garniture…). */
-  description?: string;
-  /** Quantité ou grammage fourni (« 6 unités », « Environ 1 kg »…). */
-  detail?: string;
-  /** Nombre de couverts (« Pour 2 personnes »). */
-  serves?: string;
-  /** Prix unique, en euros. */
-  price?: number;
-  /** Unité affichée après le prix (« / 100 g »). */
-  priceUnit?: string;
-  /** Plusieurs grammages, plusieurs prix. */
-  variants?: PriceVariant[];
-  /** Suppléments (ex. accord mets-vin). */
-  options?: MenuOption[];
-  tags?: MenuTag[];
-  /** Clé vers le registre d'images (`src/data/images.ts`). */
-  imageKey?: ImageKey;
-  /**
-   * `true` lorsque le prix n'a PAS été communiqué.
-   * L'interface affiche alors « Prix à préciser » — aucun prix n'est inventé.
-   */
-  priceMissing?: boolean;
-}
-
-export interface MenuCategory {
-  id: MenuCategoryId;
-  /** Titre affiché. */
-  title: string;
-  /** Sur-titre éditorial. */
-  eyebrow: string;
-  items: MenuItem[];
-}
+export type {
+  MenuCategoryId,
+  PriceVariant,
+  MenuOption,
+  MenuTag,
+  MenuItem,
+  MenuCategory,
+} from './menu.types';
+import type { MenuItem, MenuCategory } from './menu.types';
 
 /* -------------------------------------------------------------------------- */
-/*  ENTRÉES                                                                    */
+/*  ENTRÉES                                                                   */
 /* -------------------------------------------------------------------------- */
 
 export const entrees: MenuItem[] = [
@@ -110,7 +64,7 @@ export const entrees: MenuItem[] = [
 ];
 
 /* -------------------------------------------------------------------------- */
-/*  LA VIANDE                                                                  */
+/*  LA VIANDE                                                                 */
 /* -------------------------------------------------------------------------- */
 
 export const viandes: MenuItem[] = [
@@ -136,8 +90,14 @@ export const viandes: MenuItem[] = [
     id: 'noix-entrecote-argentine',
     name: "Noix d'entrecôte d'Argentine",
     variants: [
-      { label: '250 g', price: 28 },
-      { label: '350 g', price: 36 },
+      {
+        label: '250 g',
+        price: 28,
+      },
+      {
+        label: '350 g',
+        price: 36,
+      },
     ],
     imageKey: 'noixEntrecote',
   },
@@ -150,16 +110,16 @@ export const viandes: MenuItem[] = [
   {
     id: 'cote-de-boeuf',
     name: 'Côte de Bœuf',
-    serves: 'Pour 2 personnes',
     detail: 'Environ 1 kg',
+    serves: 'Pour 2 personnes',
     price: 74,
     imageKey: 'coteDeBoeuf',
   },
   {
     id: 'faux-filet',
     name: 'Faux-Filet',
-    serves: 'Pour 2 personnes',
     detail: 'Grammage selon arrivage',
+    serves: 'Pour 2 personnes',
     price: 9,
     priceUnit: '/ 100 g',
     imageKey: 'fauxFilet',
@@ -179,7 +139,7 @@ export const viandes: MenuItem[] = [
 ];
 
 /* -------------------------------------------------------------------------- */
-/*  POUR LES NON-CARNIVORES                                                    */
+/*  POUR LES NON-CARNIVORES                                                   */
 /* -------------------------------------------------------------------------- */
 
 export const nonCarnivores: MenuItem[] = [
@@ -192,7 +152,7 @@ export const nonCarnivores: MenuItem[] = [
 ];
 
 /* -------------------------------------------------------------------------- */
-/*  DESSERTS                                                                   */
+/*  DESSERTS                                                                  */
 /* -------------------------------------------------------------------------- */
 
 export const desserts: MenuItem[] = [
@@ -200,7 +160,12 @@ export const desserts: MenuItem[] = [
     id: 'assiette-de-fromage',
     name: 'Assiette de fromage',
     price: 9,
-    options: [{ label: 'Verre de vin en accord', price: 20 }],
+    options: [
+      {
+        label: 'Verre de vin en accord',
+        price: 20,
+      },
+    ],
     imageKey: 'fromage',
   },
   {
@@ -220,7 +185,9 @@ export const desserts: MenuItem[] = [
     name: 'Moelleux aux noisettes',
     description: 'Praliné amande',
     price: 10.5,
-    tags: ['SANS GLUTEN'],
+    tags: [
+      'SANS GLUTEN',
+    ],
     imageKey: 'moelleux',
   },
 ];

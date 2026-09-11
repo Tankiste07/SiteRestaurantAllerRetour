@@ -1,0 +1,144 @@
+@import 'tailwindcss';
+
+/* ==========================================================================
+   TABLEAU DE BORD — design system utilitaire
+   Clair, dense, rapide à lire — volontairement distinct du site public
+   (moody/éditorial) : ici l'objectif est la vitesse de saisie.
+   ========================================================================== */
+
+@theme {
+  --color-bg: #f6f5f2;
+  --color-surface: #ffffff;
+  --color-surface-muted: #faf9f6;
+  --color-border: #e2ded4;
+  --color-ink: #211c14;
+  --color-muted: #776f5f;
+  --color-accent: #6f101f;
+  --color-accent-hover: #58141f;
+  --color-accent-light: #f7e9e9;
+  --color-gold: #a9812f;
+  --color-danger: #b3261e;
+  --color-danger-light: #fbeceb;
+  --color-success: #2e6b3e;
+  --color-success-light: #e9f3ea;
+
+  --font-sans:
+    'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  input,
+  select,
+  textarea,
+  button {
+    font: inherit;
+    color: inherit;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: 3px;
+  }
+}
+
+@utility db-field {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.7rem;
+  font-size: 0.875rem;
+  transition: border-color 0.15s ease;
+
+  &:hover {
+    border-color: color-mix(in oklab, var(--color-accent) 40%, var(--color-border));
+  }
+  &:focus {
+    border-color: var(--color-accent);
+    outline: none;
+  }
+}
+
+@utility db-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-muted);
+  margin-bottom: 0.3rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+@utility db-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+}
+
+@utility db-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  border: 1px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+@utility db-btn-primary {
+  background-color: var(--color-accent);
+  color: white;
+  &:hover:not(:disabled) {
+    background-color: var(--color-accent-hover);
+  }
+}
+
+@utility db-btn-secondary {
+  background-color: var(--color-surface);
+  border-color: var(--color-border);
+  color: var(--color-ink);
+  &:hover:not(:disabled) {
+    border-color: var(--color-accent);
+  }
+}
+
+@utility db-btn-ghost {
+  color: var(--color-muted);
+  &:hover:not(:disabled) {
+    background-color: var(--color-surface-muted);
+    color: var(--color-ink);
+  }
+}
+
+@utility db-btn-danger {
+  background-color: var(--color-danger-light);
+  color: var(--color-danger);
+  &:hover:not(:disabled) {
+    background-color: var(--color-danger);
+    color: white;
+  }
+}
