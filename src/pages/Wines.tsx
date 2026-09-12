@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { SlidersHorizontal, Wine as WineIcon } from 'lucide-react';
+import { AlertCircle, SlidersHorizontal, Wine as WineIcon } from 'lucide-react';
 import { IMAGES } from '@/data/images';
 import { CELLAR } from '@/data/site';
 import { wineCategories, wines } from '@/data/wines';
@@ -76,6 +76,8 @@ export default function Wines() {
       >
         <ReservationButton variant="outline">Réserver une table</ReservationButton>
       </PageHero>
+
+      <AvailabilityNotice />
 
       <section className="grain relative bg-noir py-14 md:py-20" aria-labelledby="titre-selection">
         <div className="u-container relative z-10">
@@ -220,6 +222,29 @@ export default function Wines() {
         {filtersPanel}
       </FilterDrawer>
     </>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/*  DISPONIBILITÉ                                                              */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Une cave vivante voit ses stocks bouger : certaines références peuvent
+ * s'épuiser sans que la carte en ligne ne soit mise à jour dans l'instant.
+ */
+function AvailabilityNotice() {
+  return (
+    <div className="border-y border-or/20 bg-bordeaux/20">
+      <div className="u-container flex flex-col items-center gap-2.5 py-3.5 text-center sm:flex-row sm:gap-3 sm:text-left">
+        <AlertCircle size={16} strokeWidth={1.4} className="shrink-0 text-or/80" />
+        <p className="text-[0.8125rem] leading-relaxed text-ivoire/90">
+          Notre cave évolue au fil des arrivages : certaines références peuvent être
+          exceptionnellement indisponibles. N'hésitez pas à nous demander confirmation
+          directement sur place.
+        </p>
+      </div>
+    </div>
   );
 }
 

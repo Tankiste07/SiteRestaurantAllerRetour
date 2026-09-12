@@ -42,10 +42,10 @@
     },
     {
       "key": "intro",
-      "alt": "Table de restaurant, viande et verres de vin rouge",
+      "alt": "Salle et bar du restaurant L'Aller Retour",
       "tone": "bois",
       "motif": "verre",
-      "file": null,
+      "file": "intro-1789230295978.jpg",
       "protected": true
     },
     {

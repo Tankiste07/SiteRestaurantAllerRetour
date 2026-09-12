@@ -8,6 +8,7 @@
  */
 
 import herorestaurantPhoto from '@/assets/photos/herorestaurant-1789229987224.jpg';
+import introPhoto from '@/assets/photos/intro-1789230295978.jpg';
 import escargotsPhoto from '@/assets/photos/escargots-1789145967123.jpg';
 import tartareCharolaisPhoto from '@/assets/photos/tartare-charolais.jpg';
 import ongletPhoto from '@/assets/photos/onglet.jpg';
@@ -32,7 +33,12 @@ export const IMAGES = {
     tone: 'salle',
     motif: 'salle',
   },
-  intro: { alt: 'Table de restaurant, viande et verres de vin rouge', tone: 'bois', motif: 'verre' },
+  intro: {
+    src: introPhoto,
+    alt: "Salle et bar du restaurant L'Aller Retour",
+    tone: 'bois',
+    motif: 'verre',
+  },
   caveTeaser: { alt: 'Rangées de bouteilles dans la cave', tone: 'cave', motif: 'bouteille' },
 
   /* --- Entrées --- */
