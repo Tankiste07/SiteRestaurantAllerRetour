@@ -129,9 +129,8 @@ sociaux n'entrent dans le JSON-LD que lorsqu'ils sont réellement connus.
 ### 3. La cave — `src/data/wines.ts`
 
 La liste des 300+ références n'a pas encore été transmise. En attendant, la
-page affiche un **jeu de démonstration explicitement fictif** (48 bouteilles),
-signalé par un bandeau « Aperçu — données de démonstration » : rien n'est
-présenté au visiteur comme une donnée réelle du restaurant.
+page affiche un message « la cave arrive bientôt » : aucune donnée fictive
+n'est présentée au visiteur.
 
 Pour intégrer la vraie cave :
 
@@ -201,7 +200,7 @@ src/
 │   └── StructuredData.tsx
 ├── pages/           Home, Restaurant, Menu, Meat, Wines, Gallery, Contact,
 │                    Legal, Privacy, NotFound
-├── data/            site.ts · menu.ts · wines.ts · wines.demo.ts ·
+├── data/            site.ts · menu.ts · wines.ts ·
 │                    images.ts · gallery.ts · navigation.ts
 ├── hooks/           useInView · useParallax · useSeo · useLockBodyScroll · useWineCatalog
 ├── utils/           wine.ts (moteur de filtres) · format.ts · schema.ts · cn.ts
@@ -290,8 +289,8 @@ npm run smoke
 
 Monte réellement chaque page dans un DOM et vérifie : contenu rendu, `h1`
 unique et correct, `title` de la page, présence du JSON-LD, absence d'erreur
-console. Puis déroule un parcours complet dans la cave — recherche, filtre à
-facettes, tri par prix, réinitialisation, état vide.
+console. Vérifie aussi que la page La Cave affiche bien toutes les sections
+de la carte (Pet Nat/Crémant, Champagne, Blancs, Macérations, Rosé, Rouges).
 
 Le test s'appuie sur un bundle dédié (`scripts/vite.smoke.config.ts`) et
 n'intervient jamais dans le build de production.

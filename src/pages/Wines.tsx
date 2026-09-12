@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { SlidersHorizontal, Wine as WineIcon } from 'lucide-react';
 import { IMAGES } from '@/data/images';
 import { CELLAR } from '@/data/site';
-import { isDemoCellar, wines } from '@/data/wines';
+import { wineCategories, wines } from '@/data/wines';
 import { useSeo } from '@/hooks/useSeo';
 import { useWineCatalog } from '@/hooks/useWineCatalog';
 import { cn } from '@/utils/cn';
@@ -11,10 +11,22 @@ import { SORT_OPTIONS, type WineSortKey } from '@/utils/wine';
 import { PageHero } from '@/components/layout/PageHero';
 import { ReservationButton } from '@/components/ReservationButton';
 import { Reveal } from '@/components/ui/Reveal';
+import { SectionTitle } from '@/components/ui/SectionTitle';
 import { FilterDrawer } from '@/components/wines/FilterDrawer';
 import { WineCard } from '@/components/wines/WineCard';
 import { WineFilters } from '@/components/wines/WineFilters';
 import { WineSearch } from '@/components/wines/WineSearch';
+import { WineSection } from '@/components/wines/WineSection';
+
+/** Ancre HTML lisible, sans accents ni espaces — pour la navigation par sections. */
+function slugify(value: string): string {
+  return value
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
 
 export default function Wines() {
   useSeo({
@@ -27,6 +39,11 @@ export default function Wines() {
 
   const hasByTheGlass = useMemo(() => wines.some((w) => w.byTheGlass), []);
   const countLabel = `${catalog.results.length} ${plural(catalog.results.length, 'référence')}`;
+
+  /* Aucune recherche ni filtre actif : on affiche la carte structurée par
+     catégories, comme la carte papier, plutôt que la grille filtrée. */
+  const isBrowsing = catalog.filters.query.trim() === '' && catalog.activeCount === 0;
+  const showSections = isBrowsing && wines.length > 0;
 
   const filtersPanel = (
     <WineFilters
@@ -60,8 +77,6 @@ export default function Wines() {
         <ReservationButton variant="outline">Réserver une table</ReservationButton>
       </PageHero>
 
-      {isDemoCellar && <DemoNotice />}
-
       <section className="grain relative bg-noir py-14 md:py-20" aria-labelledby="titre-selection">
         <div className="u-container relative z-10">
           <h2 id="titre-selection" className="sr-only">
@@ -87,7 +102,7 @@ export default function Wines() {
             </p>
 
             <div className="flex items-center gap-3">
-              <SortSelect value={catalog.sort} onChange={catalog.setSort} />
+              {!showSections && <SortSelect value={catalog.sort} onChange={catalog.setSort} />}
 
               <button
                 type="button"
@@ -103,6 +118,24 @@ export default function Wines() {
             </div>
           </div>
 
+          {/* -------------------- Navigation rapide -------------------- */}
+          {showSections && (
+            <nav
+              aria-label="Aller à une catégorie"
+              className="mt-8 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            >
+              {wineCategories.map((cat) => (
+                <a
+                  key={cat.id}
+                  href={`#${cat.id}`}
+                  className="shrink-0 whitespace-nowrap border border-or/20 px-4 py-2 font-sans text-[0.625rem] tracking-[0.18em] text-sable uppercase transition-colors duration-300 hover:border-or/50 hover:text-creme"
+                >
+                  {cat.title}
+                </a>
+              ))}
+            </nav>
+          )}
+
           {/* -------------------- Filtres + résultats -------------------- */}
           <div className="mt-10 grid gap-10 lg:grid-cols-[17rem_1fr] lg:gap-14 xl:grid-cols-[19rem_1fr]">
             <aside className="hidden lg:block" aria-label="Filtres">
@@ -112,7 +145,30 @@ export default function Wines() {
             </aside>
 
             <div>
-              {catalog.results.length === 0 ? (
+              {showSections ? (
+                <div className="space-y-16">
+                  {wineCategories.map((cat) =>
+                    cat.subcategories ? (
+                      <div key={cat.id} id={cat.id} className="scroll-mt-28">
+                        <SectionTitle as="h2" size="md" title={cat.title} />
+                        <div className="mt-10 space-y-12">
+                          {cat.subcategories.map((sub) => (
+                            <WineSection
+                              key={sub.title}
+                              id={`${cat.id}-${slugify(sub.title)}`}
+                              title={sub.title}
+                              wines={sub.wines}
+                              sub
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <WineSection key={cat.id} id={cat.id} title={cat.title} wines={cat.wines ?? []} />
+                    ),
+                  )}
+                </div>
+              ) : catalog.results.length === 0 ? (
                 <EmptyState
                   hasFilters={catalog.activeCount > 0}
                   onReset={catalog.reset}
@@ -257,27 +313,6 @@ function EmptyState({
           Réinitialiser les filtres
         </button>
       )}
-    </div>
-  );
-}
-
-/**
- * Bandeau explicite affiché tant que la cave réelle n'a pas été fournie.
- * Aucune bouteille de démonstration n'est présentée comme réelle.
- */
-function DemoNotice() {
-  return (
-    <div className="border-y border-or/25 bg-bordeaux/25">
-      <div className="u-container flex flex-col gap-2 py-4 text-center sm:flex-row sm:items-center sm:justify-center sm:gap-4 sm:text-left">
-        <span className="font-sans text-[0.625rem] font-medium tracking-[0.24em] text-or-clair uppercase">
-          Aperçu
-        </span>
-        <p className="text-[0.8125rem] leading-relaxed text-ivoire/90">
-          Les bouteilles ci-dessous sont des <strong className="font-medium text-creme">données
-          de démonstration</strong>, destinées à illustrer la navigation. La cave réelle du
-          restaurant sera intégrée dès réception de la liste.
-        </p>
-      </div>
     </div>
   );
 }

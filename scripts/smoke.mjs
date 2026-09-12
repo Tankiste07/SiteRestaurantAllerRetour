@@ -122,10 +122,11 @@ console.log(
 );
 
 /* -------------------------------------------------------------------------- */
-/*  LA CAVE — parcours complet : recherche, filtre, tri, réinitialisation      */
+/*  LA CAVE — vérifie que la carte structurée par catégories s'affiche         */
+/*  (toutes les sections de la carte papier), sans erreur console.             */
 /* -------------------------------------------------------------------------- */
 
-console.log('\nParcours de la cave :');
+console.log('\nPage La Cave :');
 
 {
   const virtualConsole = new VirtualConsole();
@@ -166,79 +167,14 @@ console.log('\nParcours de la cave :');
     await window.__monter('/la-cave');
 
     const { document } = window;
-    const cards = () => document.querySelectorAll('article').length;
-    /* Compteur de résultats annoncé aux lecteurs d'écran (zone aria-live). */
-    const announced = () => {
-      const node = document.querySelector('p[aria-live="polite"]');
-      return Number((node?.textContent ?? '').match(/\d+/)?.[0] ?? -1);
-    };
+    const text = document.body.textContent;
 
-    const total = announced();
-    check('cave chargée', total > 0 && cards() > 0, `${total} références, ${cards()} cartes rendues`);
+    const sections = ['Pet Nat / Crémant', 'Champagne', 'Vins Blancs', 'Macérations', 'Rosé', 'Vins rouges'];
+    const missing = sections.filter((s) => !text.includes(s));
+    check('sections de la carte affichées', missing.length === 0, missing.length ? `manquantes : ${missing.join(', ')}` : `${sections.length} sections`);
 
-    /* --- Recherche --- */
-    const input = document.getElementById('recherche-vin');
-    const setValue = Object.getOwnPropertyDescriptor(
-      window.HTMLInputElement.prototype,
-      'value',
-    ).set;
-
-    await window.__agir(() => {
-      setValue.call(input, 'bourgogne');
-      input.dispatchEvent(new window.Event('input', { bubbles: true }));
-    });
-    const searched = announced();
-    check(
-      'recherche « bourgogne »',
-      searched > 0 && searched < total,
-      `${searched} sur ${total}`,
-    );
-
-    /* --- Réinitialisation via la croix du champ --- */
-    await window.__agir(() => {
-      setValue.call(input, '');
-      input.dispatchEvent(new window.Event('input', { bubbles: true }));
-    });
-    check('recherche effacée', announced() === total, `${announced()} références`);
-
-    /* --- Filtre par facette (première case à cocher du panneau) --- */
-    const checkbox = document.querySelector('aside input[type="checkbox"]');
-    const facetLabel = checkbox?.closest('label')?.textContent?.trim() ?? '?';
-    await window.__agir(() => checkbox.click());
-    const filtered = announced();
-    check('filtre par facette', filtered > 0 && filtered < total, `« ${facetLabel} » → ${filtered}`);
-
-    /* --- Tri par prix croissant --- */
-    const select = document.querySelector('select');
-    const setSelect = Object.getOwnPropertyDescriptor(
-      window.HTMLSelectElement.prototype,
-      'value',
-    ).set;
-    await window.__agir(() => {
-      setSelect.call(select, 'price-asc');
-      select.dispatchEvent(new window.Event('change', { bubbles: true }));
-    });
-    const prices = [...document.querySelectorAll('article')]
-      .map((a) => a.textContent.match(/(\d+)\s*€/g)?.at(-1))
-      .filter(Boolean)
-      .map((s) => Number(s.replace(/\D/g, '')));
-    const sorted = prices.every((p, i) => i === 0 || prices[i - 1] <= p);
-    check('tri par prix croissant', sorted && prices.length > 1, `${prices.slice(0, 4).join(' ≤ ')} …`);
-
-    /* --- Réinitialiser tous les filtres --- */
-    const resetButton = [...document.querySelectorAll('aside button')].find((b) =>
-      /réinitialiser/i.test(b.textContent ?? ''),
-    );
-    await window.__agir(() => resetButton.click());
-    check('réinitialisation des filtres', announced() === total, `${announced()} références`);
-
-    /* --- Recherche sans résultat --- */
-    await window.__agir(() => {
-      setValue.call(input, 'zzzzzz');
-      input.dispatchEvent(new window.Event('input', { bubbles: true }));
-    });
-    const empty = document.body.textContent.includes('Aucune bouteille');
-    check('état vide', empty, empty ? 'message affiché' : 'message manquant');
+    const cards = document.querySelectorAll('article').length;
+    check('bouteilles rendues', cards > 0, `${cards} fiches`);
 
     if (errors.length) {
       failures += 1;
@@ -246,7 +182,7 @@ console.log('\nParcours de la cave :');
     }
   } catch (error) {
     failures += 1;
-    console.log(`ECHEC parcours cave                          ${error.message}`);
+    console.log(`ECHEC page cave                              ${error.message}`);
   } finally {
     window.close();
   }

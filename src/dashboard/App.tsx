@@ -1,15 +1,17 @@
 import { useState } from 'react';
-import { AlertTriangle, ImageIcon, UploadCloud, UtensilsCrossed } from 'lucide-react';
+import { AlertTriangle, ImageIcon, UploadCloud, UtensilsCrossed, Wine } from 'lucide-react';
 import { DataStoreProvider, useData } from './DataStore';
 import { ToastProvider } from './components/Toast';
 import { MenuPage } from './pages/MenuPage';
+import { WinesPage } from './pages/WinesPage';
 import { ImagesPage } from './pages/ImagesPage';
 import { PublishPage } from './pages/PublishPage';
 
-type Tab = 'menu' | 'images' | 'publish';
+type Tab = 'menu' | 'wines' | 'images' | 'publish';
 
 const TABS: { id: Tab; label: string; icon: typeof UtensilsCrossed }[] = [
   { id: 'menu', label: 'La Carte', icon: UtensilsCrossed },
+  { id: 'wines', label: 'La Cave', icon: Wine },
   { id: 'images', label: 'Images', icon: ImageIcon },
   { id: 'publish', label: 'Publier', icon: UploadCloud },
 ];
@@ -61,6 +63,8 @@ function Shell() {
           <p className="text-sm text-[var(--color-muted)]">Chargement…</p>
         ) : tab === 'menu' ? (
           <MenuPage />
+        ) : tab === 'wines' ? (
+          <WinesPage />
         ) : tab === 'images' ? (
           <ImagesPage />
         ) : (

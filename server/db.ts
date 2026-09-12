@@ -108,6 +108,7 @@ export interface DbMenuItem {
 export interface DbSchema {
   images: DbImage[];
   menu: DbMenuItem[];
+  wines: DbWine[];
   meta: {
     lastPublishedAt: string | null;
     lastPublishedCommit: string | null;
@@ -153,6 +154,95 @@ export const CATEGORY_ORDER: MenuCategoryId[] = [
   'viandes',
   'non-carnivores',
   'desserts',
+];
+
+/* -------------------------------------------------------------------------- */
+/*  LA CAVE                                                                    */
+/* -------------------------------------------------------------------------- */
+
+export type WineColor = 'Rouge' | 'Blanc' | 'Rosé' | 'Champagne' | 'Effervescent' | 'Vin doux';
+
+export type WineCategoryId =
+  | 'petillants'
+  | 'champagne'
+  | 'blancs-doux'
+  | 'blancs'
+  | 'macerations'
+  | 'rose'
+  | 'rouges';
+
+export interface DbWine {
+  id: string;
+  category: WineCategoryId;
+  /** Sous-titre affiché (« Loire », « Bourgogne »…) — uniquement pour Blancs et Rouges. */
+  subcategory?: string;
+  /** Position d'affichage au sein de la catégorie (+ sous-catégorie le cas échéant). */
+  order: number;
+  name?: string;
+  producer?: string;
+  appellation?: string;
+  region?: string;
+  type?: WineColor;
+  grape?: string;
+  vintage?: string | number;
+  volume?: string;
+  price?: number;
+  description?: string;
+  byTheGlass?: boolean;
+  stock?: number;
+}
+
+export const WINE_CATEGORY_META: Record<WineCategoryId, { title: string }> = {
+  petillants: { title: 'Pet Nat / Crémant' },
+  champagne: { title: 'Champagne' },
+  'blancs-doux': { title: 'Vins Blancs Doux' },
+  blancs: { title: 'Vins Blancs' },
+  macerations: { title: 'Macérations' },
+  rose: { title: 'Rosé' },
+  rouges: { title: 'Vins rouges' },
+};
+
+export const WINE_CATEGORY_ORDER: WineCategoryId[] = [
+  'petillants',
+  'champagne',
+  'blancs-doux',
+  'blancs',
+  'macerations',
+  'rose',
+  'rouges',
+];
+
+/** Sous-titres, dans l'ordre d'affichage — uniquement pour les catégories subdivisées. */
+export const WINE_SUBCATEGORY_ORDER: Partial<Record<WineCategoryId, string[]>> = {
+  blancs: [
+    'Loire',
+    'Bourgogne',
+    'Monde',
+    'Jura',
+    'Bordeaux',
+    'Languedoc-Roussillon & Sud Ouest',
+    'Rhône, Provence & Corse',
+  ],
+  rouges: [
+    'Magnum (1,5 L)',
+    'Monde',
+    'Italie',
+    'Loire',
+    'Jura & Savoie',
+    'Auvergne',
+    'Languedoc-Roussillon',
+    'Bourgogne',
+    'Jéroboam (5 L)',
+  ],
+};
+
+export const WINE_COLORS: WineColor[] = [
+  'Rouge',
+  'Blanc',
+  'Rosé',
+  'Champagne',
+  'Effervescent',
+  'Vin doux',
 ];
 
 /* -------------------------------------------------------------------------- */
@@ -268,9 +358,283 @@ const seedMenu: DbMenuItem[] = [
   },
 ];
 
+const seedWines: DbWine[] = [
+  /* --- Pet Nat / Crémant --- */
+  { id: 'furlani-anpino', category: 'petillants', order: 0, name: 'Furlani Anpino', producer: 'Matteo Furlani', appellation: 'Vino da Tavola', region: 'Italie', grape: 'Vernaccia', price: 40, type: 'Effervescent' },
+  { id: 'minuit-pauline-lair', category: 'petillants', order: 1, name: 'Minuit', producer: 'Pauline Lair', appellation: 'Vin de France', vintage: 2025, grape: 'Folle Blanche', price: 40, type: 'Effervescent' },
+  { id: 'bbf-tissot', category: 'petillants', order: 2, name: 'BBF', producer: 'domaine Tissot', appellation: 'Crémant du Jura', region: 'Jura', grape: 'Chardonnay', price: 70, type: 'Effervescent' },
+  { id: 'blanc-de-noir-tissot', category: 'petillants', order: 3, name: 'Blanc de Noir', producer: 'domaine Tissot', appellation: 'Crémant du Jura', region: 'Jura', grape: 'Pinot Noir', price: 70, type: 'Effervescent' },
+
+  /* --- Champagne --- */
+  { id: 'louis-nicaise', category: 'champagne', order: 0, name: 'Louis Nicaise', appellation: '1er Cru de Champagne', region: 'Champagne', grape: 'Chardonnay, Pinot Noir, Pinot Meunier', price: 32, volume: 'Demi-bouteille (37,5 cl)', type: 'Champagne' },
+  { id: 'solessence-jm-seleque', category: 'champagne', order: 1, name: 'Solessence', producer: 'domaine JM Sélèque', appellation: 'Champagne, Extra Brut', region: 'Champagne', grape: 'Chardonnay, Meunier, Pinot Noir', price: 78, type: 'Champagne' },
+  { id: 'solessence-rose-jm-seleque', category: 'champagne', order: 2, name: 'Solessence Rosé', producer: 'domaine JM Sélèque', appellation: 'Champagne, Extra Brut', region: 'Champagne', grape: 'Pinot Noir, Chardonnay, Meunier', price: 94, type: 'Champagne' },
+  { id: 'quintette-jm-seleque', category: 'champagne', order: 3, name: 'Quintette', producer: 'domaine JM Sélèque', appellation: 'Champagne, Extra Brut', region: 'Champagne', grape: 'Chardonnay', price: 98, type: 'Champagne' },
+  { id: 'anthocyanes-doquet', category: 'champagne', order: 4, name: 'Anthocyanes', producer: 'Pascal Doquet', appellation: '1er Cru de Champagne, Extra Brut', region: 'Champagne', grape: 'Pinot Noir, Chardonnay', price: 98, type: 'Champagne' },
+  { id: 'avize-marguet', category: 'champagne', order: 5, name: 'Avize', producer: 'domaine Marguet', appellation: 'Grand Cru', region: 'Champagne', vintage: 2019, grape: 'Chardonnay', price: 132, type: 'Champagne' },
+  { id: 'le-cotet-lassaigne', category: 'champagne', order: 6, name: 'Le Cotet', producer: 'Emmanuel Lassaigne', appellation: 'Champagne, Extra Brut', region: 'Champagne', grape: 'Chardonnay', price: 155, type: 'Champagne' },
+  { id: 'champ-dalouette-doquet', category: 'champagne', order: 7, name: "Champ d'Alouette", producer: 'Pascal Doquet', appellation: '1er Cru de Champagne', region: 'Champagne', vintage: 2004, grape: 'Chardonnay', price: 178, type: 'Champagne' },
+
+  /* --- Vins Blancs Doux --- */
+  { id: 'cuvee-monplaisir-souch', category: 'blancs-doux', order: 0, name: 'Cuvée Monplaisir', producer: 'domaine de Souch', appellation: 'Jurançon', region: 'Sud-Ouest', vintage: 2024, grape: 'Gros Manseng, Petit Manseng', price: 48, type: 'Vin doux' },
+  { id: 'braunberger-juffer-spatlese-haag', category: 'blancs-doux', order: 1, name: 'Braunberger Juffer Spätlese', producer: 'Fritz Haag', appellation: 'Moselle Allemande', region: 'Allemagne', vintage: 2018, grape: 'Riesling', price: 58, type: 'Vin doux' },
+  { id: 'braunberger-juffer-auslese-haag', category: 'blancs-doux', order: 2, name: 'Braunberger Juffer Auslese', producer: 'Fritz Haag', appellation: 'Moselle Allemande', region: 'Allemagne', vintage: 2021, grape: 'Riesling', price: 82, type: 'Vin doux' },
+
+  /* --- Vins Blancs — Loire --- */
+  { id: 'les-bornes-pelle', category: 'blancs', subcategory: 'Loire', order: 0, name: 'Les Bornés', producer: 'domaine Pellé', appellation: 'Menetou-Salon', region: 'Loire', vintage: 2025, grape: 'Sauvignon', price: 40, type: 'Blanc' },
+  { id: 'premices-belliviere', category: 'blancs', subcategory: 'Loire', order: 1, name: 'Prémices', producer: 'domaine de Bellivière', appellation: 'Coteaux du Loir', region: 'Loire', vintage: 2023, grape: 'Chenin', price: 43, type: 'Blanc' },
+  { id: 'terre-de-3-terra-vita-vinum', category: 'blancs', subcategory: 'Loire', order: 2, name: 'Terre de 3', producer: 'Terra Vita Vinum', appellation: 'Anjou', region: 'Loire', vintage: 2023, grape: 'Chenin', price: 44, type: 'Blanc' },
+  { id: 'tournebride-gaudry', category: 'blancs', subcategory: 'Loire', order: 3, name: 'Tournebride', producer: 'domaine Vincent Gaudry', appellation: 'Sancerre', region: 'Loire', vintage: 2023, grape: 'Sauvignon', price: 50, type: 'Blanc' },
+  { id: 'les-salles-martin-sanzay', category: 'blancs', subcategory: 'Loire', order: 4, name: 'Les Salles Martin', producer: 'Antoine Sanzay', appellation: 'Saumur', region: 'Loire', vintage: 2023, grape: 'Chenin', price: 62, type: 'Blanc' },
+  { id: 'bistrologie-robinot', category: 'blancs', subcategory: 'Loire', order: 5, name: 'Bistrologie', producer: "L'Opéra des Vins JP Robinot", appellation: 'Vin de France', region: 'Loire', vintage: 2021, grape: 'Chenin', price: 64, type: 'Blanc' },
+  { id: 'sur-le-nez-maisons-rouges', category: 'blancs', subcategory: 'Loire', order: 6, name: 'Sur le Nez', producer: 'Les Maisons Rouges', appellation: 'Jasnières', region: 'Loire', vintage: 2023, grape: 'Chenin', price: 72, type: 'Blanc' },
+  { id: 'les-acacias-villemade-2012', category: 'blancs', subcategory: 'Loire', order: 7, name: 'Les Acacias', producer: 'Hervé Villemade', appellation: 'Cour-Cheverny', region: 'Loire', vintage: 2012, grape: 'Romorantin', price: 76, type: 'Blanc' },
+  { id: 'les-acacias-villemade-2019-magnum', category: 'blancs', subcategory: 'Loire', order: 8, name: 'Les Acacias', producer: 'Hervé Villemade', appellation: 'Cour-Cheverny', region: 'Loire', vintage: 2019, grape: 'Romorantin', price: 124, volume: 'Magnum (1,5 L)', type: 'Blanc' },
+  { id: 'pour-vous-gaudry', category: 'blancs', subcategory: 'Loire', order: 9, name: 'Pour Vous', producer: 'domaine Vincent Gaudry', appellation: 'Sancerre', region: 'Loire', vintage: 2021, grape: 'Sauvignon', price: 148, type: 'Blanc' },
+
+  /* --- Vins Blancs — Bourgogne --- */
+  { id: 'cuvee-du-clocher-tripoz', category: 'blancs', subcategory: 'Bourgogne', order: 0, name: 'Cuvée du Clocher', producer: 'Céline & Laurent Tripoz', appellation: 'Mâcon-Loché', region: 'Bourgogne', vintage: 2022, grape: 'Chardonnay', price: 42, type: 'Blanc' },
+  { id: 'la-chatelaine-soeur-cadette', category: 'blancs', subcategory: 'Bourgogne', order: 1, name: 'La Châtelaine', producer: 'domaine La Soeur Cadette', appellation: 'Vézelay', region: 'Bourgogne', vintage: 2023, grape: 'Chardonnay', price: 48, type: 'Blanc' },
+  { id: 'chablis-enclos', category: 'blancs', subcategory: 'Bourgogne', order: 2, name: 'Chablis', producer: "domaine de l'Enclos", appellation: 'Chablis', region: 'Bourgogne', vintage: 2023, grape: 'Chardonnay', price: 56, type: 'Blanc' },
+  { id: 'clematis-naudin', category: 'blancs', subcategory: 'Bourgogne', order: 3, name: 'Clématis', producer: 'Claire Naudin', appellation: 'Hautes Côtes de Nuits', region: 'Bourgogne', vintage: 2020, grape: 'Chardonnay', price: 68, type: 'Blanc' },
+  { id: 'aragonite-clos-des-vignes-du-mayne', category: 'blancs', subcategory: 'Bourgogne', order: 4, name: 'Aragonite', producer: 'Clos des Vignes du Mayne', appellation: 'Mâcon-Cruzille', region: 'Bourgogne', vintage: 2022, grape: 'Chardonnay', price: 78, type: 'Blanc' },
+  { id: 'les-chataigners-hubert-lamy', category: 'blancs', subcategory: 'Bourgogne', order: 5, name: 'Les Châtaigners', producer: 'domaine Hubert Lamy', appellation: 'Bourgogne', region: 'Bourgogne', vintage: 2023, grape: 'Chardonnay', price: 88, type: 'Blanc' },
+  { id: 'chablis-1er-cru-vau-de-vey-enclos', category: 'blancs', subcategory: 'Bourgogne', order: 6, name: 'Chablis 1er Cru Vau de Vey', producer: "domaine de l'Enclos", appellation: 'Chablis 1er Cru', region: 'Bourgogne', vintage: 2023, grape: 'Chardonnay', price: 88, type: 'Blanc' },
+  { id: 'saint-aubin-1er-cru-en-remilly-montille', category: 'blancs', subcategory: 'Bourgogne', order: 7, name: 'Saint-Aubin 1er Cru « En Rémilly »', producer: 'domaine de Montille', appellation: 'Saint-Aubin 1er Cru', region: 'Bourgogne', vintage: 2022, grape: 'Chardonnay', price: 114, type: 'Blanc' },
+  { id: 'ambonnay-blanc-marguet', category: 'blancs', subcategory: 'Bourgogne', order: 8, name: 'Ambonnay Blanc', producer: 'Domaine Marguet', appellation: 'Coteaux Champenois', region: 'Champagne', vintage: 2019, grape: 'Chardonnay', price: 115, type: 'Blanc' },
+  { id: 'pouilly-fuisse-valette', category: 'blancs', subcategory: 'Bourgogne', order: 9, name: 'Pouilly-Fuissé', producer: 'Maison Valette', appellation: 'Pouilly-Fuissé', region: 'Bourgogne', vintage: 2015, grape: 'Chardonnay', price: 128, type: 'Blanc' },
+  { id: 'puligny-montrachet-montille', category: 'blancs', subcategory: 'Bourgogne', order: 10, name: 'Puligny-Montrachet', producer: 'domaine de Montille', appellation: 'Puligny-Montrachet', region: 'Bourgogne', vintage: 2022, grape: 'Chardonnay', price: 134, type: 'Blanc' },
+  { id: 'meursault-morey', category: 'blancs', subcategory: 'Bourgogne', order: 11, name: 'Meursault', producer: 'Pierre Morey', appellation: 'Meursault', region: 'Bourgogne', vintage: 2022, grape: 'Chardonnay', price: 145, type: 'Blanc' },
+  { id: 'meursault-saint-christophe-montille', category: 'blancs', subcategory: 'Bourgogne', order: 12, name: 'Meursault « Saint Christophe »', producer: 'domaine de Montille', appellation: 'Meursault', region: 'Bourgogne', vintage: 2022, grape: 'Chardonnay', price: 158, type: 'Blanc' },
+  { id: 'meursault-clos-le-meix-travaux-morey', category: 'blancs', subcategory: 'Bourgogne', order: 13, name: 'Meursault « Clos le Meix Travaux »', producer: 'Pierre Morey', appellation: 'Meursault', region: 'Bourgogne', vintage: 2021, grape: 'Chardonnay', price: 162, type: 'Blanc' },
+  { id: 'le-clos-de-monsieur-noly-valette', category: 'blancs', subcategory: 'Bourgogne', order: 14, name: '« Le Clos de Monsieur Noly »', producer: 'domaine Valette', appellation: 'Pouilly-Fuissé', region: 'Bourgogne', vintage: '2011+2012+2013+2016+2018', grape: 'Chardonnay', price: 210, type: 'Blanc' },
+
+  /* --- Vins Blancs — Monde --- */
+  { id: 'vn-partida-creus', category: 'blancs', subcategory: 'Monde', order: 0, name: 'VN', producer: 'Partida Creus', region: 'Espagne', vintage: 2020, grape: 'Garnacha blanca, Macabeu, Moscatell, Vinyater, Xarel·lo, Parsé, Parellada', price: 37, type: 'Blanc' },
+  { id: 'roditis-ligas', category: 'blancs', subcategory: 'Monde', order: 1, name: 'Roditis', producer: 'domaine Ligas', region: 'Grèce, Pella', vintage: 2020, grape: 'Roditis', price: 44, type: 'Blanc' },
+  { id: 'la-rumbera-artigas', category: 'blancs', subcategory: 'Monde', order: 2, name: 'La Rumbera', producer: 'Oriol Artigas', region: 'Catalogne, Espagne', vintage: 2021, grape: 'Pensa Blanca', price: 51, type: 'Blanc' },
+  { id: 'gt-nestarec', category: 'blancs', subcategory: 'Monde', order: 3, name: 'G&T', producer: 'Milan Nestarec', region: 'République Tchèque', vintage: 2019, grape: 'Riesling, Sauvignon blanc, Pinot blanc', price: 94, type: 'Blanc' },
+
+  /* --- Vins Blancs — Jura --- */
+  { id: 'patchwork-tissot', category: 'blancs', subcategory: 'Jura', order: 0, name: 'Patchwork', producer: 'domaine Tissot', appellation: 'Arbois', region: 'Jura', vintage: 2022, grape: 'Chardonnay', price: 80, type: 'Blanc' },
+  { id: 'rose-massale-tissot', category: 'blancs', subcategory: 'Jura', order: 1, name: 'Rose Massale', producer: 'domaine Tissot', appellation: 'Arbois', region: 'Jura', vintage: 2023, grape: 'Chardonnay', price: 84, type: 'Blanc' },
+  { id: 'savagnin-ouille-tissot', category: 'blancs', subcategory: 'Jura', order: 2, name: 'Savagnin Ouillé', producer: 'domaine Tissot', appellation: 'Arbois', region: 'Jura', vintage: 2022, grape: 'Savagnin', price: 86, type: 'Blanc' },
+  { id: 'empreinte-marnes-blanches', category: 'blancs', subcategory: 'Jura', order: 3, name: 'Empreinte', producer: 'domaine des Marnes Blanches', appellation: 'Côtes du Jura', region: 'Jura', vintage: 2015, grape: 'Savagnin', price: 86, type: 'Blanc' },
+  { id: 'feel-good-cossard', category: 'blancs', subcategory: 'Jura', order: 4, name: 'Feel Good', producer: 'Frédéric Cossard', appellation: 'Vin de France', region: 'Jura', vintage: 2020, grape: 'Savagnin', price: 90, type: 'Blanc' },
+  { id: 'vin-de-paille-ganevat', category: 'blancs', subcategory: 'Jura', order: 5, name: 'Vin de Paille', producer: 'Anne & Jean-François Ganevat', appellation: 'Côtes du Jura', region: 'Jura', vintage: 2014, grape: 'Savagnin', price: 93, volume: '37,5 cl', type: 'Blanc' },
+  { id: 'savagnin-sous-voile-tissot', category: 'blancs', subcategory: 'Jura', order: 6, name: 'Savagnin Sous Voile', producer: 'domaine Tissot', appellation: 'Arbois', region: 'Jura', vintage: 2020, grape: 'Savagnin', price: 96, type: 'Blanc' },
+  { id: 'chateau-chalon-pinte', category: 'blancs', subcategory: 'Jura', order: 7, name: 'Château-Chalon', producer: 'domaine de la Pinte', appellation: 'Vin Jaune / Château-Chalon', region: 'Jura', vintage: 2016, grape: 'Savagnin', price: 119, volume: '62 cl', type: 'Blanc' },
+  { id: 'en-spois-tissot', category: 'blancs', subcategory: 'Jura', order: 8, name: 'En Spois', producer: 'domaine Tissot', appellation: 'Vin Jaune / Arbois', region: 'Jura', vintage: 2017, grape: 'Savagnin', price: 130, volume: '62 cl', type: 'Blanc' },
+
+  /* --- Vins Blancs — Bordeaux --- */
+  { id: 'chateau-haut-bergey', category: 'blancs', subcategory: 'Bordeaux', order: 0, name: 'Château Haut-Bergey', appellation: 'Pessac-Léognan', region: 'Bordeaux', vintage: 2019, grape: 'Sauvignon, Sémillon', price: 80, type: 'Blanc' },
+
+  /* --- Vins Blancs — Languedoc-Roussillon & Sud Ouest --- */
+  { id: 'lignieres-navarre', category: 'blancs', subcategory: 'Languedoc-Roussillon & Sud Ouest', order: 0, name: 'Lignières', producer: 'Thierry Navarre', appellation: 'Vin de France', region: 'Languedoc-Roussillon & Sud Ouest', vintage: 2025, grape: 'Ribeyrenc blanc, Grenache gris, Clairette du Languedoc', price: 38, type: 'Blanc' },
+  { id: 'synthese-riberach', category: 'blancs', subcategory: 'Languedoc-Roussillon & Sud Ouest', order: 1, name: 'Synthèse', producer: 'domaine Riberach', appellation: 'Côtes Catalanes', region: 'Languedoc-Roussillon & Sud Ouest', vintage: 2023, grape: 'Macabeu, Grenache, Carignan', price: 40, type: 'Blanc' },
+  { id: 'serpent-a-plumes-la-calmette', category: 'blancs', subcategory: 'Languedoc-Roussillon & Sud Ouest', order: 2, name: 'Serpent à Plumes', producer: 'domaine La Calmette', appellation: 'Vin de France', region: 'Languedoc-Roussillon & Sud Ouest', vintage: 2024, grape: 'Noual, Sauvignon, Chenin, Sylvaner', price: 44, type: 'Blanc' },
+  { id: 'lestrade-magnon', category: 'blancs', subcategory: 'Languedoc-Roussillon & Sud Ouest', order: 3, name: "L'Estrade", producer: 'Maxime Magnon', appellation: 'Vin de France', region: 'Languedoc-Roussillon & Sud Ouest', vintage: 2024, grape: 'Grenache, Bourboulenc', price: 45, type: 'Blanc' },
+  { id: 'hypothese-riberach-blanc', category: 'blancs', subcategory: 'Languedoc-Roussillon & Sud Ouest', order: 4, name: 'Hypothèse', producer: 'domaine Riberach', appellation: 'Côtes Catalanes', region: 'Languedoc-Roussillon & Sud Ouest', vintage: 2019, grape: 'Carignan gris', price: 62, type: 'Blanc' },
+  { id: 'la-begou-magnon', category: 'blancs', subcategory: 'Languedoc-Roussillon & Sud Ouest', order: 5, name: 'La Bégou', producer: 'Maxime Magnon', appellation: 'Corbières', region: 'Languedoc-Roussillon & Sud Ouest', vintage: 2022, grape: 'Grenache Gris', price: 76, type: 'Blanc' },
+  { id: 'vin-de-voile-plageolles', category: 'blancs', subcategory: 'Languedoc-Roussillon & Sud Ouest', order: 6, name: 'Vin de Voile', producer: 'domaine Plageolles', appellation: 'Gaillac', region: 'Languedoc-Roussillon & Sud Ouest', vintage: 1996, grape: 'Mauzac', price: 89, type: 'Blanc' },
+  { id: 'trelans-chabanon', category: 'blancs', subcategory: 'Languedoc-Roussillon & Sud Ouest', order: 7, name: 'Trélans', producer: 'Alain Chabanon', appellation: "Vin de Pays d'Oc", region: 'Languedoc-Roussillon & Sud Ouest', vintage: 2008, grape: 'Vermentino, Chenin', price: 98, type: 'Blanc' },
+  { id: 'coume-gineste-gauby', category: 'blancs', subcategory: 'Languedoc-Roussillon & Sud Ouest', order: 8, name: 'Coume Gineste', producer: 'Domaine Gauby', appellation: 'Côtes Catalanes', region: 'Languedoc-Roussillon & Sud Ouest', vintage: 2017, grape: 'Grenache Gris, Grenache Blanc', price: 125, type: 'Blanc' },
+
+  /* --- Vins Blancs — Rhône, Provence & Corse --- */
+  { id: 'khroma-argentiere-blanc', category: 'blancs', subcategory: 'Rhône, Provence & Corse', order: 0, name: 'Khrôma', producer: "domaine de l'Argentière", appellation: 'Vin de France', region: 'Rhône, Provence & Corse', vintage: 2023, grape: 'Grenache blanc, Clairette, Bourboulenc', price: 38, type: 'Blanc' },
+  { id: 'chateau-saint-anne-blanc-2023', category: 'blancs', subcategory: 'Rhône, Provence & Corse', order: 1, name: 'Château Saint Anne', appellation: 'Bandol', region: 'Rhône, Provence & Corse', vintage: 2023, grape: 'Ugni blanc, Clairette', price: 54, type: 'Blanc' },
+  { id: 'la-vigne-de-dom-dumas', category: 'blancs', subcategory: 'Rhône, Provence & Corse', order: 2, name: 'La Vigne de Dom', producer: 'François Dumas', appellation: 'Vin de France', region: 'Rhône, Provence & Corse', vintage: 2021, grape: 'Marsanne, Roussanne, Riesling, Chenin', price: 56, type: 'Blanc' },
+  { id: 'faustine-abbatucci', category: 'blancs', subcategory: 'Rhône, Provence & Corse', order: 3, name: 'Faustine', producer: 'domaine Comte Abbatucci', appellation: 'Vin de France', region: 'Rhône, Provence & Corse', vintage: 2023, grape: 'Vermentino', price: 67, type: 'Blanc' },
+  { id: 'chateau-simone', category: 'blancs', subcategory: 'Rhône, Provence & Corse', order: 4, name: 'Château Simone', appellation: 'Palette', region: 'Rhône, Provence & Corse', vintage: 2022, grape: 'Clairette, Grenache blanc, Bourboulenc, Ugni blanc, Muscat blanc', price: 98, type: 'Blanc' },
+  { id: 'les-terrasses-de-lempire-vernay', category: 'blancs', subcategory: 'Rhône, Provence & Corse', order: 5, name: "Les Terrasses de l'Empire", producer: 'domaine Georges Vernay', appellation: 'Condrieu', region: 'Rhône, Provence & Corse', vintage: 2023, grape: 'Viognier', price: 100, type: 'Blanc' },
+  { id: 'les-olivier-gonon', category: 'blancs', subcategory: 'Rhône, Provence & Corse', order: 6, name: '« Les Olivier »', producer: 'Pierre Gonon', appellation: 'Saint-Joseph', region: 'Rhône, Provence & Corse', vintage: 2021, grape: 'Marsanne, Roussanne', price: 108, type: 'Blanc' },
+  { id: 'sb-16-20-beauger', category: 'blancs', subcategory: 'Rhône, Provence & Corse', order: 7, name: 'SB 16/20', producer: 'Pierre Beauger', appellation: 'Vin de France', region: 'Rhône, Provence & Corse', vintage: '2016/2020', grape: 'Sauvignon', price: 142, type: 'Blanc' },
+
+  /* --- Macérations --- */
+  { id: 'khroma-argentiere-maceration', category: 'macerations', order: 0, name: 'Khrôma', producer: "domaine de l'Argentière", appellation: 'Vin de France', region: 'Rhône, Provence & Corse', vintage: 2023, grape: 'Grenaches gris et blanc, Clairette, Bourboulenc', price: 38 },
+  { id: 'verdeca-macchiarola', category: 'macerations', order: 1, name: '« Verdeca »', producer: 'Tenuta Macchiarola', appellation: 'Salento', region: 'Italie', vintage: 2023, grape: 'Verdeca', price: 44 },
+  { id: 'acoco-ortigas', category: 'macerations', order: 2, name: 'Acoco', producer: 'Oriol Ortigas', appellation: 'Catalogne, Espagne', region: 'Catalogne, Espagne', vintage: 2021, grape: 'Pansa Blanca', price: 60 },
+  { id: 'jakot-radikon', category: 'macerations', order: 3, name: 'Jakot', producer: 'Radikon', region: 'Italie, Venezia Giulia', vintage: 2015, grape: 'Friulano', price: 68, volume: '50 cl' },
+  { id: 'silicium-schnabel', category: 'macerations', order: 4, name: 'Silicium', producer: 'Weingut Karl & Eva Schnabel', region: 'Autriche', vintage: 2020, grape: 'Morillon, Riesling', price: 72 },
+  { id: 'antika-veltlinske-zelene-nestarec', category: 'macerations', order: 5, name: 'Antika Veltlinské zelené', producer: 'Milan Nestarec', region: 'République Tchèque', vintage: 2013, grape: 'Gruner Veltliner', price: 79 },
+  { id: 'kydonitsa-barrique-ligas', category: 'macerations', order: 6, name: 'Kydonitsa barrique', producer: 'domaine Ligas', region: 'Grèce', vintage: 2020, grape: 'Kydonitsa', price: 80 },
+  { id: 'ribolla-3781-radikon', category: 'macerations', order: 7, name: 'Ribolla 3781', producer: 'Radikon', region: 'Italie, Venezia Giulia', vintage: 2007, grape: 'Ribolla', price: 126, volume: '50 cl' },
+
+  /* --- Rosé --- */
+  { id: 'wildrose-brand-brothers', category: 'rose', order: 0, name: 'Wildrose', producer: 'Brand Brothers', region: 'Allemagne', vintage: 2020, grape: 'Blauer Portugieser, Pinot Noir', price: 38, type: 'Rosé' },
+  { id: 'jojo-blacailloux', category: 'rose', order: 1, name: 'Jojo', producer: 'Bastide de Blacailloux', appellation: 'Coteaux Varois en Provence', region: 'Provence', vintage: 2025, grape: 'Grenache, Syrah', price: 38, type: 'Rosé' },
+  { id: 'susucaru-rosato-cornelissen', category: 'rose', order: 2, name: 'Susucaru Rosato', producer: 'Az. Agr. Franck Cornelissen', appellation: 'Terre Siciliane', region: 'Italie', vintage: 2021, grape: 'Nerello Mascalese, Malvoisie, Moscadella, Inzolia', price: 42, type: 'Rosé' },
+  { id: 'chateau-saint-anne-rose-2024', category: 'rose', order: 3, name: 'Château Saint Anne', appellation: 'Bandol', region: 'Provence', vintage: 2024, grape: 'Mourvèdre, Cinsault, Grenache', price: 46, type: 'Rosé' },
+  { id: 'metisse-magnon', category: 'rose', order: 4, name: 'Métisse', producer: 'Maxime Magnon', appellation: 'Corbières', region: 'Languedoc-Roussillon', vintage: 2024, grape: 'Grenache noir, Cinsault, Carignan, Syrah', price: 45, type: 'Rosé' },
+
+  /* --- Vins rouges — Magnum (1,5 L) --- */
+  { id: 'le-petit-derna-boussens-magnum', category: 'rouges', subcategory: 'Magnum (1,5 L)', order: 0, name: '« Le Petit Derna »', producer: 'Guillaume Boussens', appellation: 'IGP Pays de Cucugnan', region: 'Languedoc-Roussillon', vintage: 2021, grape: 'Syrah, Carignan, Grenache', price: 76, volume: 'Magnum (1,5 L)', type: 'Rouge' },
+  { id: 'barbera-del-monferrato-morando-magnum', category: 'rouges', subcategory: 'Magnum (1,5 L)', order: 1, name: 'Barbera del Monferrato', producer: 'Morando Silvio', appellation: 'Barbera del Monferrato', region: 'Italie', vintage: 2023, grape: 'Barbera', price: 84, volume: 'Magnum (1,5 L)', type: 'Rouge' },
+  { id: 'renaissance-viret-magnum', category: 'rouges', subcategory: 'Magnum (1,5 L)', order: 2, name: 'Renaissance', producer: 'domaine Viret', appellation: 'Vin de France', region: 'Rhône', vintage: 2019, grape: 'Grenache, Syrah, Mourvèdre, Carignan', price: 98, volume: 'Magnum (1,5 L)', type: 'Rouge' },
+  { id: 'sainte-paule-jean-max-magnum', category: 'rouges', subcategory: 'Magnum (1,5 L)', order: 3, name: 'Sainte-Paule', producer: 'Jean Max', appellation: 'Beaujolais', region: 'Beaujolais', vintage: 2023, grape: 'Gamay', price: 102, volume: 'Magnum (1,5 L)', type: 'Rouge' },
+  { id: 'crozes-hermitage-combier-magnum', category: 'rouges', subcategory: 'Magnum (1,5 L)', order: 4, name: 'Crozes-Hermitage', producer: 'domaine Combier', appellation: 'Crozes-Hermitage', region: 'Rhône', vintage: 2023, grape: 'Syrah', price: 104, volume: 'Magnum (1,5 L)', type: 'Rouge' },
+  { id: 'chateau-de-dernacueillette-boussens-magnum', category: 'rouges', subcategory: 'Magnum (1,5 L)', order: 5, name: 'Château de Dernacueillette', producer: 'Guillaume Boussens', appellation: 'Corbières', region: 'Languedoc-Roussillon', vintage: 2021, grape: 'Syrah, Carignan, Grenache', price: 118, volume: 'Magnum (1,5 L)', type: 'Rouge' },
+  { id: 'dd-tissot-2024-magnum', category: 'rouges', subcategory: 'Magnum (1,5 L)', order: 6, name: 'D.D', producer: 'domaine Tissot', appellation: 'Arbois', region: 'Jura', vintage: 2024, grape: 'Poulsard, Trousseau, Pinot Noir', price: 120, volume: 'Magnum (1,5 L)', type: 'Rouge' },
+  { id: 'cuvee-anne-fleur-boussens-magnum', category: 'rouges', subcategory: 'Magnum (1,5 L)', order: 7, name: 'Cuvée Anne Fleur', producer: 'Guillaume Boussens', appellation: 'Corbières', region: 'Languedoc-Roussillon', vintage: 2021, grape: 'Syrah, Carignan, Grenache', price: 120, volume: 'Magnum (1,5 L)', type: 'Rouge' },
+  { id: 'sur-le-chene-chevrot-2021-magnum', category: 'rouges', subcategory: 'Magnum (1,5 L)', order: 8, name: '« Sur le Chêne »', producer: 'domaine Chevrot', appellation: 'Maranges', region: 'Bourgogne', vintage: 2021, grape: 'Pinot Noir', price: 124, volume: 'Magnum (1,5 L)', type: 'Rouge' },
+  { id: 'sur-le-chene-chevrot-2020-magnum', category: 'rouges', subcategory: 'Magnum (1,5 L)', order: 9, name: '« Sur le Chêne »', producer: 'domaine Chevrot', appellation: 'Maranges', region: 'Bourgogne', vintage: 2020, grape: 'Pinot Noir', price: 126, volume: 'Magnum (1,5 L)', type: 'Rouge' },
+  { id: 'en-carran-chassorney-magnum', category: 'rouges', subcategory: 'Magnum (1,5 L)', order: 10, name: 'En Carran', producer: 'domaine de Chassorney', appellation: 'Bourgogne', region: 'Bourgogne', vintage: 2023, grape: 'Pinot Noir', price: 138, volume: 'Magnum (1,5 L)', type: 'Rouge' },
+  { id: 'emilien-chateau-le-puy-magnum', category: 'rouges', subcategory: 'Magnum (1,5 L)', order: 11, name: 'Emilien', producer: 'Château le Puy', appellation: 'Vin de France', region: 'Bordeaux', vintage: 2021, grape: 'Merlot, Cabernet Franc, Cabernet Sauvignon', price: 140, volume: 'Magnum (1,5 L)', type: 'Rouge' },
+  { id: 'rs19-radikon-magnum', category: 'rouges', subcategory: 'Magnum (1,5 L)', order: 12, name: 'RS19', producer: 'Radikon', region: 'Italie, Venezia Giulia', vintage: 2019, grape: 'Merlot, Pignolo', price: 142, volume: 'Magnum (1,5 L)', type: 'Rouge' },
+  { id: 'terrasse-du-diable-pallieres-magnum', category: 'rouges', subcategory: 'Magnum (1,5 L)', order: 13, name: 'Terrasse du Diable', producer: 'Les Pallières', appellation: 'Gigondas', region: 'Rhône', vintage: 2017, grape: 'Grenache noir, Mourvèdre, Clairette', price: 144, volume: 'Magnum (1,5 L)', type: 'Rouge' },
+  { id: 'saint-joseph-villa-magnum', category: 'rouges', subcategory: 'Magnum (1,5 L)', order: 14, name: 'Saint-Joseph', producer: 'Pierre Jean Villa', appellation: 'Saint-Joseph', region: 'Rhône', vintage: 2023, grape: 'Syrah', price: 160, volume: 'Magnum (1,5 L)', type: 'Rouge' },
+  { id: 'grande-reserve-binet-jacquet-magnum', category: 'rouges', subcategory: 'Magnum (1,5 L)', order: 15, name: 'Grande Réserve', producer: 'domaine Binet Jacquet', appellation: 'Faugères', region: 'Languedoc-Roussillon', vintage: 2020, grape: 'Carignan, Syrah, Grenache, Mourvèdre', price: 164, volume: 'Magnum (1,5 L)', type: 'Rouge' },
+  { id: 'lulu-et-lucien-tempier-magnum', category: 'rouges', subcategory: 'Magnum (1,5 L)', order: 16, name: 'Lulu & Lucien', producer: 'domaine Tempier', appellation: 'Bandol', region: 'Provence', vintage: 2022, grape: 'Mourvèdre', price: 168, volume: 'Magnum (1,5 L)', type: 'Rouge' },
+  { id: 'le-chevalier-falfas-magnum', category: 'rouges', subcategory: 'Magnum (1,5 L)', order: 17, name: 'Le Chevalier', producer: 'Château Falfas', appellation: 'Côtes de Bourg', region: 'Bordeaux', vintage: 2017, grape: 'Merlot, Cabernet Sauvignon, Cabernet Franc, Malbec, Petit Verdot', price: 198, volume: 'Magnum (1,5 L)', type: 'Rouge' },
+  { id: 'clos-des-grives-combier-magnum', category: 'rouges', subcategory: 'Magnum (1,5 L)', order: 18, name: 'Clos des Grives', producer: 'domaine Combier', appellation: 'Crozes-Hermitage', region: 'Rhône', vintage: 2023, grape: 'Syrah', price: 204, volume: 'Magnum (1,5 L)', type: 'Rouge' },
+  { id: 'chateau-meylet-2018-magnum', category: 'rouges', subcategory: 'Magnum (1,5 L)', order: 19, name: 'Château Meylet', appellation: 'Saint-Émilion Grand Cru', region: 'Bordeaux', vintage: 2018, grape: 'Merlot, Cabernet Franc', price: 218, volume: 'Magnum (1,5 L)', type: 'Rouge' },
+  { id: 'emergence-viret-magnum', category: 'rouges', subcategory: 'Magnum (1,5 L)', order: 20, name: 'Emergence', producer: 'domaine Viret', appellation: 'Vin de France', region: 'Rhône', vintage: 2004, grape: 'Grenache, Syrah, Carignan', price: 220, volume: 'Magnum (1,5 L)', type: 'Rouge' },
+  { id: 'chateau-meylet-2012-magnum', category: 'rouges', subcategory: 'Magnum (1,5 L)', order: 21, name: 'Château Meylet', appellation: 'Saint-Émilion Grand Cru', region: 'Bordeaux', vintage: 2012, grape: 'Merlot, Cabernet Franc', price: 286, volume: 'Magnum (1,5 L)', type: 'Rouge' },
+  { id: 'vieux-telegraphe-2021-magnum', category: 'rouges', subcategory: 'Magnum (1,5 L)', order: 22, name: 'Domaine du Vieux Télégraphe', appellation: 'Châteauneuf-du-Pape', region: 'Rhône', vintage: 2021, grape: 'Grenache noir, Mourvèdre, Syrah, Cinsault, Clairette,…', price: 330, volume: 'Magnum (1,5 L)', type: 'Rouge' },
+  { id: '1869-trapet-magnum', category: 'rouges', subcategory: 'Magnum (1,5 L)', order: 23, name: '1869', producer: 'domaine Trapet', appellation: 'Gevrey-Chambertin', region: 'Bourgogne', vintage: 2022, grape: 'Pinot Noir', price: 380, volume: 'Magnum (1,5 L)', type: 'Rouge' },
+  { id: 'chateau-meylet-1998-magnum', category: 'rouges', subcategory: 'Magnum (1,5 L)', order: 24, name: 'Château Meylet', appellation: 'Saint-Émilion Grand Cru', region: 'Bordeaux', vintage: 1998, grape: 'Merlot, Cabernet Franc', price: 460, volume: 'Magnum (1,5 L)', type: 'Rouge' },
+  { id: 'chateau-meylet-1979-magnum', category: 'rouges', subcategory: 'Magnum (1,5 L)', order: 25, name: 'Château Meylet', appellation: 'Saint-Émilion Grand Cru', region: 'Bordeaux', vintage: 1979, grape: 'Merlot, Cabernet Franc', price: 480, volume: 'Magnum (1,5 L)', type: 'Rouge' },
+
+  /* --- Vins rouges — Monde --- */
+  { id: 'ink-beck', category: 'rouges', subcategory: 'Monde', order: 0, name: 'Ink', producer: 'Judith Beck', region: 'Autriche', vintage: 2018, grape: 'Saint Laurent, Zweigelt', price: 34, type: 'Rouge' },
+  { id: 'andert-wein', category: 'rouges', subcategory: 'Monde', order: 1, name: 'Andert Wein', region: 'Autriche', vintage: 2018, grape: 'Blauer Zweigelt', price: 38, type: 'Rouge' },
+  { id: 'clandestinus-garay', category: 'rouges', subcategory: 'Monde', order: 2, name: 'ClandeStinus', producer: 'Imanol Garay', region: 'Espagne', vintage: 2022, grape: 'Grenache', price: 44, type: 'Rouge' },
+  { id: 'sylvan-methode-sauvage-iruan', category: 'rouges', subcategory: 'Monde', order: 3, name: 'Sylvan', producer: 'Méthode Sauvage Iruan', region: 'Californie', vintage: 2022, grape: 'Trousseau', price: 49, type: 'Rouge' },
+  { id: 'el-rumbero-artigas', category: 'rouges', subcategory: 'Monde', order: 4, name: 'El Rumbero', producer: 'Oriol Artigas', region: 'Catalogne', vintage: 2021, grape: 'Grenache', price: 50, type: 'Rouge' },
+  { id: 'i-vicini-grignolino-peron', category: 'rouges', subcategory: 'Monde', order: 5, name: 'I Vicini Grignolino', producer: 'Jean Yves Péron', appellation: 'Vin de la CEE', vintage: 2020, grape: 'Grignolino', price: 65, type: 'Rouge' },
+  { id: 'podfuck-nestarec', category: 'rouges', subcategory: 'Monde', order: 6, name: 'Podfuck', producer: 'Milan Nestarec', region: 'République Tchèque', vintage: 2019, grape: 'Pinot Gris, Pinot Noir', price: 76, type: 'Rouge' },
+  { id: 'bucephale-ligas', category: 'rouges', subcategory: 'Monde', order: 7, name: 'Bucéphale', producer: 'domaine Ligas', region: 'Grèce, Pella', vintage: 2020, grape: 'Xinomavro', price: 78, type: 'Rouge' },
+
+  /* --- Vins rouges — Italie --- */
+  { id: 'barbera-del-monferrato-morando', category: 'rouges', subcategory: 'Italie', order: 0, name: 'Barbera del Monferrato', producer: 'Morando Silvio', appellation: 'Barbera del Monferrato', region: 'Italie', vintage: 2023, grape: 'Barbera', price: 42, type: 'Rouge' },
+  { id: 'unodinoi-macchiarola', category: 'rouges', subcategory: 'Italie', order: 1, name: 'Unodinoi', producer: 'Tenuta Macchiarola', appellation: 'IGT Primitivo Salento', region: 'Italie', vintage: 2024, grape: 'Primitivo', price: 44, type: 'Rouge' },
+  { id: 'susucaru-cornelissen', category: 'rouges', subcategory: 'Italie', order: 2, name: 'Susucaru', producer: 'Franck Cornelissen', appellation: 'Vino Rosso', region: 'Italie', vintage: 2020, grape: 'Nerello Mascalese, Minella, Alicante Bouschet', price: 48, type: 'Rouge' },
+  { id: 'rossore-luli', category: 'rouges', subcategory: 'Italie', order: 3, name: 'Rossore', producer: 'Cantina Luli', appellation: "Barbera d'Asti", region: 'Italie', vintage: 2020, grape: 'Barbera', price: 58, type: 'Rouge' },
+  { id: 'cerasuolo-di-vittoria-cos', category: 'rouges', subcategory: 'Italie', order: 4, name: 'Cerasuolo di Vittoria', producer: 'Azienda Agricola COS', appellation: 'Cerasuolo di Vittoria', region: 'Italie', vintage: 2020, grape: "Nero d'Avola, Frappato", price: 59, type: 'Rouge' },
+  { id: 'lodolaio-castelvecchi', category: 'rouges', subcategory: 'Italie', order: 5, name: 'Lodolaio', producer: 'Castelvecchi', appellation: 'Chianti Classico Riserva', region: 'Italie', vintage: 2019, grape: 'Sangiovese', price: 74, type: 'Rouge' },
+  { id: 'sausto-monte-dallora', category: 'rouges', subcategory: 'Italie', order: 6, name: 'Sausto', producer: "Monte Dall'Ora", appellation: 'Valpolicella Ripasso', region: 'Italie', vintage: 2021, grape: 'Corvina, Corvinone, Rondinella, Croatina, Oseleta', price: 76, type: 'Rouge' },
+  { id: 'sinfonia-di-rosso-viola', category: 'rouges', subcategory: 'Italie', order: 7, name: 'Sinfonia di Rosso', producer: 'Alessandro Viola', appellation: 'Terre Siciliane IGT', region: 'Italie', vintage: 2021, grape: 'Nerello Mascalese', price: 78, type: 'Rouge' },
+  { id: 'san-giorgio-alto-monte-dallora', category: 'rouges', subcategory: 'Italie', order: 8, name: 'San Giorgio Alto', producer: "Monte Dall'Ora", appellation: 'Valpolicella Classico Superiore', region: 'Italie', vintage: 2019, grape: 'Corvina', price: 82, type: 'Rouge' },
+  { id: 'arcuria-graci', category: 'rouges', subcategory: 'Italie', order: 9, name: 'Arcuria', producer: 'Azienda Agricola Graci', appellation: 'Etna Rosso', region: 'Italie', vintage: 2021, grape: 'Nerello Mascalese', price: 96, type: 'Rouge' },
+  { id: 'brunello-di-montalcino-leonardo-da-vinci', category: 'rouges', subcategory: 'Italie', order: 10, name: 'Brunello di Montalcino', producer: 'Azienda Leonardo da Vinci', appellation: 'Brunello di Montalcino', region: 'Italie', vintage: 2017, grape: 'Sangiovese', price: 98, type: 'Rouge' },
+  { id: 'la-vegia-tere-ruse', category: 'rouges', subcategory: 'Italie', order: 11, name: 'La Vegia', producer: 'Azienda Vitivinicola Tère Ruse', appellation: 'Vino Rosso', region: 'Italie', vintage: 2017, grape: 'Barbera', price: 99, type: 'Rouge' },
+  { id: 'schioppettino-bressan', category: 'rouges', subcategory: 'Italie', order: 12, name: 'Schioppettino', producer: 'Bressan Mastri Vinai', region: 'Italie, Venezia Giulia', vintage: 2018, grape: 'Schioppettino', price: 104, type: 'Rouge' },
+  { id: 'barolo-castellero-brezza', category: 'rouges', subcategory: 'Italie', order: 13, name: 'Barolo Castellero', producer: 'Azienda Agricola Brezza', appellation: 'Barolo', region: 'Italie', vintage: 2018, grape: 'Nebbiolo', price: 106, type: 'Rouge' },
+
+  /* --- Vins rouges — Loire --- */
+  { id: 'mon-nom-est-rouge-maunoury', category: 'rouges', subcategory: 'Loire', order: 0, name: 'Mon Nom est Rouge', producer: 'domaine Maunoury', appellation: 'Saumur-Puy-Notre-Dame', region: 'Loire', vintage: '2022/2023', grape: 'Cabernet Franc', price: 38, type: 'Rouge' },
+  { id: 'la-paterne-sanzay', category: 'rouges', subcategory: 'Loire', order: 1, name: 'La Paterne', producer: 'Antoine Sanzay', appellation: 'Saumur-Champigny', region: 'Loire', vintage: 2024, grape: 'Cabernet Franc', price: 40, type: 'Rouge' },
+  { id: 'le-zudefruit-lambert', category: 'rouges', subcategory: 'Loire', order: 2, name: 'Le Zudefruit', producer: 'Jérôme Lambert', appellation: 'Vin de France', region: 'Loire', vintage: 2020, grape: 'Grolleau', price: 44, type: 'Rouge' },
+  { id: 'esprit-du-lieu-maunoury', category: 'rouges', subcategory: 'Loire', order: 3, name: 'Esprit du Lieu', producer: 'domaine Maunoury', appellation: 'Saumur-Puy-Notre-Dame', region: 'Loire', vintage: 2019, grape: 'Cabernet Franc', price: 49, type: 'Rouge' },
+  { id: 'cobalt-lair', category: 'rouges', subcategory: 'Loire', order: 4, name: 'Cobalt', producer: 'Pauline Lair', appellation: 'Vin de France', region: 'Loire', vintage: 2021, grape: 'Cabernet Franc', price: 52, type: 'Rouge' },
+  { id: 'morogues-pelle', category: 'rouges', subcategory: 'Loire', order: 5, name: 'Morogues', producer: 'domaine Pellé', appellation: 'Menetou-Salon', region: 'Loire', vintage: 2015, grape: 'Pinot Noir', price: 56, type: 'Rouge' },
+  { id: 'aigues-vives-bouges', category: 'rouges', subcategory: 'Loire', order: 6, name: 'Aigues Vives', producer: 'domaine Mikaël Bouges', appellation: 'Touraine', region: 'Loire', vintage: 2020, grape: 'Côt', price: 60, type: 'Rouge' },
+  { id: 'les-poyeux-sanzay', category: 'rouges', subcategory: 'Loire', order: 7, name: 'Les Poyeux', producer: 'domaine Antoine Sanzay', appellation: 'Saumur-Champigny', region: 'Loire', vintage: '2019/2020', grape: 'Cabernet Franc', price: 70, type: 'Rouge' },
+  { id: 'racines-courtoix', category: 'rouges', subcategory: 'Loire', order: 8, name: 'Racines', producer: 'Claude Courtoix – Les Cailloux du Paradis', appellation: 'Vin de France', region: 'Loire', vintage: 2019, grape: 'Cabernet Franc, Côt, Gamay,…', price: 76, type: 'Rouge' },
+  { id: 'lhuisserie-alliet', category: 'rouges', subcategory: 'Loire', order: 9, name: "L'Huisserie", producer: 'domaine Philippe Alliet', appellation: 'Chinon', region: 'Loire', vintage: 2014, grape: 'Cabernet Franc', price: 98, type: 'Rouge' },
+  { id: 'le-pinot-noir-courtoix', category: 'rouges', subcategory: 'Loire', order: 10, name: 'Le Pinot Noir', producer: 'Claude Courtoix – Les Cailloux du Paradis', appellation: 'Vin de France', region: 'Loire', vintage: 2019, grape: 'Pinot Noir', price: 114, type: 'Rouge' },
+
+  /* --- Vins rouges — Jura & Savoie --- */
+  { id: 'ploussard-overnoy-criquand', category: 'rouges', subcategory: 'Jura & Savoie', order: 0, name: 'Ploussard', producer: 'domaine Overnoy-Criquand', appellation: 'Arbois-Pupillin', region: 'Jura & Savoie', vintage: 2022, grape: 'Poulsard', price: 48, type: 'Rouge' },
+  { id: 'cuvee-marie-clotilde-berlioz', category: 'rouges', subcategory: 'Jura & Savoie', order: 1, name: 'Cuvée Marie Clotilde', producer: 'Adrien Berlioz', appellation: 'Savoie', region: 'Jura & Savoie', vintage: 2019, grape: 'Mondeuse', price: 56, type: 'Rouge' },
+  { id: 'dd-tissot-standard', category: 'rouges', subcategory: 'Jura & Savoie', order: 2, name: 'D.D', producer: 'domaine Tissot', appellation: 'Arbois', region: 'Jura & Savoie', vintage: '2023/2024', grape: 'Poulsard, Trousseau, Pinot Noir', price: 56, type: 'Rouge' },
+  { id: 'poulsard-vieilles-vignes-tissot', category: 'rouges', subcategory: 'Jura & Savoie', order: 3, name: 'Poulsard Vieilles Vignes', producer: 'domaine Tissot', appellation: 'Arbois', region: 'Jura & Savoie', vintage: 2023, grape: 'Poulsard', price: 64, type: 'Rouge' },
+  { id: 'jen-veux-encore-ganevat', category: 'rouges', subcategory: 'Jura & Savoie', order: 4, name: "J'en veux encore", producer: 'Jean François Ganevat', appellation: 'Vin de France', region: 'Jura & Savoie', vintage: 'NM', grape: 'Gamay, Trousseau', price: 70, type: 'Rouge' },
+  { id: 'singulier-tissot', category: 'rouges', subcategory: 'Jura & Savoie', order: 5, name: 'Singulier', producer: 'domaine Tissot', appellation: 'Arbois', region: 'Jura & Savoie', vintage: '2022/2023', grape: 'Trousseau', price: 72, type: 'Rouge' },
+  { id: 'confidentiel-tissot', category: 'rouges', subcategory: 'Jura & Savoie', order: 6, name: 'Confidentiel', producer: 'domaine Tissot', appellation: 'Côtes du Jura', region: 'Jura & Savoie', vintage: 2024, grape: 'Poulsard', price: 78, type: 'Rouge' },
+  { id: 'en-barberon-tissot', category: 'rouges', subcategory: 'Jura & Savoie', order: 7, name: 'En Barberon', producer: 'domaine Tissot', appellation: 'Côtes du Jura', region: 'Jura & Savoie', vintage: 2023, grape: 'Pinot Noir', price: 102, type: 'Rouge' },
+
+  /* --- Vins rouges — Auvergne --- */
+  { id: 'les-milans-tricot', category: 'rouges', subcategory: 'Auvergne', order: 0, name: 'Les Milans', producer: 'Marie et Vincent Tricot', appellation: 'Vin de France', region: 'Auvergne', vintage: 2022, grape: 'Pinot Noir, Gamay', price: 42, type: 'Rouge' },
+  { id: 'le-petit-rouge-de-la-cote-ouest-tricot', category: 'rouges', subcategory: 'Auvergne', order: 1, name: 'Le Petit Rouge de la Côte Ouest', producer: 'Marie et Vincent Tricot', appellation: 'Vin de France', region: 'Auvergne', vintage: 2022, grape: 'Gamay', price: 44, type: 'Rouge' },
+  { id: 'les-petites-fleurs-tricot', category: 'rouges', subcategory: 'Auvergne', order: 2, name: 'Les Petites Fleurs', producer: 'Marie et Vincent Tricot', appellation: 'Vin de France', region: 'Auvergne', vintage: 2023, grape: 'Gamay', price: 46, type: 'Rouge' },
+
+  /* --- Vins rouges — Languedoc-Roussillon --- */
+  { id: 'trinquette-petite-baigneuse', category: 'rouges', subcategory: 'Languedoc-Roussillon', order: 0, name: 'Trinquette', producer: 'La Petite Baigneuse', appellation: 'Vin de France', region: 'Languedoc-Roussillon', vintage: 2021, grape: 'Grenache, Carignan', price: 32, type: 'Rouge' },
+  { id: 'bombadilom-rouanet', category: 'rouges', subcategory: 'Languedoc-Roussillon', order: 1, name: 'Bombadilom', producer: 'Thomas Rouanet', appellation: 'Vin de France', region: 'Languedoc-Roussillon', vintage: 2023, grape: 'Grenache, Carignan', price: 36, type: 'Rouge' },
+  { id: 'pithon-357-pithon', category: 'rouges', subcategory: 'Languedoc-Roussillon', order: 2, name: 'Pithon 357', producer: 'domaine Olivier Pithon', appellation: 'Côtes Catalanes', region: 'Languedoc-Roussillon', vintage: 2024, grape: 'Grenache, Syrah', price: 36, type: 'Rouge' },
+  { id: 'xb-terrasse-delise', category: 'rouges', subcategory: 'Languedoc-Roussillon', order: 3, name: 'XB', producer: "domaine de la Terrasse d'Elise", appellation: 'IGP Hérault', region: 'Languedoc-Roussillon', vintage: 2024, grape: 'Syrah', price: 38, type: 'Rouge' },
+  { id: 'ribeyrenc-navarre', category: 'rouges', subcategory: 'Languedoc-Roussillon', order: 4, name: 'Ribeyrenc', producer: 'Thierry Navarre', appellation: 'Vin de France', region: 'Languedoc-Roussillon', vintage: 2024, grape: 'Ribeyrenc', price: 38, type: 'Rouge' },
+  { id: 'tour-de-pierre-heritage-pic-saint-loup', category: 'rouges', subcategory: 'Languedoc-Roussillon', order: 5, name: 'Tour de Pierre', producer: 'domaine Héritage du Pic Saint Loup', appellation: 'Pic Saint Loup', region: 'Languedoc-Roussillon', vintage: 2024, grape: 'Syrah, Grenache, Mourvèdre', price: 40, type: 'Rouge' },
+  { id: 'heureux-qui-comme-flo-busch', category: 'rouges', subcategory: 'Languedoc-Roussillon', order: 6, name: 'Heureux qui comme…', producer: 'domaine Flo Busch', appellation: 'Languedoc', region: 'Languedoc-Roussillon', vintage: 2023, grape: 'Carignan, Grenache, Syrah', price: 40, type: 'Rouge' },
+  { id: 'domaine-des-2-cles', category: 'rouges', subcategory: 'Languedoc-Roussillon', order: 7, name: 'Domaine des 2 Clés', appellation: 'Corbières', region: 'Languedoc-Roussillon', vintage: 2022, grape: 'Carignan, Syrah, Grenache', price: 40, type: 'Rouge' },
+  { id: 'cuvee-olivier-navarre', category: 'rouges', subcategory: 'Languedoc-Roussillon', order: 8, name: 'Cuvée Olivier', producer: 'Thierry Navarre', appellation: 'Saint-Chinian', region: 'Languedoc-Roussillon', vintage: 2024, grape: 'Syrah, Grenache', price: 40, type: 'Rouge' },
+  { id: 'domaine-de-dernacueillette-boussens', category: 'rouges', subcategory: 'Languedoc-Roussillon', order: 9, name: 'Domaine de Dernacueillette', producer: 'Guillaume Boussens', appellation: 'Corbières', region: 'Languedoc-Roussillon', vintage: 2021, grape: 'Syrah, Carignan, Grenache', price: 42, type: 'Rouge' },
+  { id: 'g-une-revelation-terrasse-delise', category: 'rouges', subcategory: 'Languedoc-Roussillon', order: 10, name: 'G une révélation', producer: "domaine de la Terrasse d'Elise", appellation: 'IGP Hérault', region: 'Languedoc-Roussillon', vintage: 2023, grape: 'Grenache', price: 42, type: 'Rouge' },
+  { id: 'comme-avant-modat', category: 'rouges', subcategory: 'Languedoc-Roussillon', order: 11, name: 'Comme avant', producer: 'domaine Modat', appellation: 'Côtes du Roussillon Villages Caramany', region: 'Languedoc-Roussillon', vintage: 2019, grape: 'Carignan, Grenache, Syrah', price: 44, type: 'Rouge' },
+  { id: 'campredon-chabanon', category: 'rouges', subcategory: 'Languedoc-Roussillon', order: 12, name: 'Campredon', producer: 'Alain Chabanon', appellation: 'Terrasses du Larzac', region: 'Languedoc-Roussillon', vintage: 2022, grape: 'Syrah, Mourvèdre, Grenache, Carignan', price: 44, type: 'Rouge' },
+  { id: 'le-petit-merle-aux-alouettes-chabanon', category: 'rouges', subcategory: 'Languedoc-Roussillon', order: 13, name: 'Le Petit Merle aux Alouettes', producer: 'Alain Chabanon', appellation: 'Vin de France', region: 'Languedoc-Roussillon', vintage: 2022, grape: 'Merlot', price: 44, type: 'Rouge' },
+  { id: 'saint-jacques-magnon', category: 'rouges', subcategory: 'Languedoc-Roussillon', order: 14, name: 'Saint Jacques', producer: 'Maxime Magnon', appellation: 'Vin de France', region: 'Languedoc-Roussillon', vintage: 2024, grape: 'Grenache, Cinsault, Mourvèdre', price: 45, type: 'Rouge' },
+  { id: 'car-aimant-vinoceros', category: 'rouges', subcategory: 'Languedoc-Roussillon', order: 15, name: 'Car Aimant', producer: 'domaine Vinoceros', appellation: 'Vin de France', region: 'Languedoc-Roussillon', vintage: 2019, grape: 'Grenache noir, Carignan, Syrah', price: 46, type: 'Rouge' },
+  { id: 'campagne-de-centeilles-2013-clos-centeilles', category: 'rouges', subcategory: 'Languedoc-Roussillon', order: 16, name: 'Campagne de Centeilles', producer: 'Clos Centeilles', appellation: 'Minervois', region: 'Languedoc-Roussillon', vintage: 2013, grape: 'Cinsault', price: 47, type: 'Rouge' },
+  { id: 'les-calcinaires-gauby', category: 'rouges', subcategory: 'Languedoc-Roussillon', order: 17, name: 'Les Calcinaires', producer: 'domaine Gauby', appellation: 'Côtes Catalanes', region: 'Languedoc-Roussillon', vintage: 2023, grape: 'Syrah, Mourvèdre, Grenache Noir, Carignan', price: 48, type: 'Rouge' },
+  { id: 'le-cordieres-des-andes-fond-cypres', category: 'rouges', subcategory: 'Languedoc-Roussillon', order: 18, name: 'Le Cordières des Andes', producer: 'domaine Fond Cyprès', appellation: 'Vin de France', region: 'Languedoc-Roussillon', vintage: 2020, grape: 'Grenache, Carignan, Syrah', price: 48, type: 'Rouge' },
+  { id: 'sans-plus-attendre-modat', category: 'rouges', subcategory: 'Languedoc-Roussillon', order: 19, name: 'Sans plus attendre', producer: 'domaine Modat', appellation: 'Côtes du Roussillon Villages Caramany', region: 'Languedoc-Roussillon', vintage: 2020, grape: 'Syrah, Grenache, Carignan', price: 50, type: 'Rouge' },
+  { id: 'lais-pithon', category: 'rouges', subcategory: 'Languedoc-Roussillon', order: 20, name: 'Lais', producer: 'Olivier Pithon', appellation: 'Côtes du Roussillon', region: 'Languedoc-Roussillon', vintage: 2020, grape: 'Grenache, Carignan, Mourvèdre', price: 52, type: 'Rouge' },
+  { id: 'chateau-les-hauts-de-dernacueillette-boussens', category: 'rouges', subcategory: 'Languedoc-Roussillon', order: 21, name: 'Château les Hauts de Dernacueillette', producer: 'Guillaume Boussens', appellation: 'Corbières', region: 'Languedoc-Roussillon', vintage: 2019, grape: 'Syrah, Carignan, Grenache', price: 56, type: 'Rouge' },
+  { id: 'le-pradelou-terrasse-delise', category: 'rouges', subcategory: 'Languedoc-Roussillon', order: 22, name: 'Le Pradelou', producer: "domaine de la Terrasse d'Elise", appellation: 'IGP Hérault', region: 'Languedoc-Roussillon', vintage: 2023, grape: 'Cinsault', price: 59, type: 'Rouge' },
+  { id: 'hypothese-riberach-rouge', category: 'rouges', subcategory: 'Languedoc-Roussillon', order: 23, name: 'Hypothèse', producer: 'domaine Riberach', appellation: 'Côtes Catalanes', region: 'Languedoc-Roussillon', vintage: 2015, grape: 'Grenache', price: 60, type: 'Rouge' },
+  { id: 'le-merle-aux-alouettes-chabanon-2020', category: 'rouges', subcategory: 'Languedoc-Roussillon', order: 24, name: 'Le Merle aux Alouettes', producer: 'Alain Chabanon', appellation: 'Saint-Guilhem-le-Désert', region: 'Languedoc-Roussillon', vintage: 2020, grape: 'Merlot', price: 68, type: 'Rouge' },
+  { id: 'les-hauts-de-carols-braujou', category: 'rouges', subcategory: 'Languedoc-Roussillon', order: 25, name: "Les Hauts de Carol's", producer: "Xavier Braujou, La Terrasse d'Elise", appellation: "Pays d'Hérault", region: 'Languedoc-Roussillon', vintage: 2019, grape: 'Cinsault', price: 69, type: 'Rouge' },
+  { id: 'lesprit-de-font-caude-chabanon', category: 'rouges', subcategory: 'Languedoc-Roussillon', order: 26, name: "L'Esprit de Font Caude", producer: 'Alain Chabanon', appellation: 'Montpeyroux, Languedoc', region: 'Languedoc-Roussillon', vintage: 2020, grape: 'Syrah, Mourvèdre, Grenache', price: 76, type: 'Rouge' },
+  { id: 'laphyllante-vaisse', category: 'rouges', subcategory: 'Languedoc-Roussillon', order: 27, name: "L'Aphyllante", producer: 'domaine Vaisse', appellation: "Pays d'Hérault", region: 'Languedoc-Roussillon', vintage: 2021, grape: 'Mourvèdre', price: 78, type: 'Rouge' },
+  { id: 'grande-reserve-binet-jacquet-standard', category: 'rouges', subcategory: 'Languedoc-Roussillon', order: 28, name: 'Grande Réserve', producer: 'domaine Binet Jacquet', appellation: 'Faugères', region: 'Languedoc-Roussillon', vintage: 2020, grape: 'Carignan, Syrah, Grenache, Mourvèdre', price: 78, type: 'Rouge' },
+  { id: 'terre-de-jonquieres-mas-del-camoura', category: 'rouges', subcategory: 'Languedoc-Roussillon', order: 29, name: 'Terre de Jonquières', producer: 'Mas del Camoura', appellation: 'Terrasses du Larzac', region: 'Languedoc-Roussillon', vintage: 2023, grape: 'Syrah, Grenache, Mourvèdre, Carignan, Cinsault', price: 78, type: 'Rouge' },
+  { id: 'saut-de-cote-chabanon', category: 'rouges', subcategory: 'Languedoc-Roussillon', order: 30, name: 'Saut de Côte', producer: 'Alain Chabanon', appellation: "IGP Pays d'Oc", region: 'Languedoc-Roussillon', vintage: 2019, grape: 'Mourvèdre, Syrah', price: 78, type: 'Rouge' },
+  { id: 'campagnes-magnon', category: 'rouges', subcategory: 'Languedoc-Roussillon', order: 31, name: 'Campagnès', producer: 'domaine Maxime Magnon', appellation: 'Corbières', region: 'Languedoc-Roussillon', vintage: 2017, grape: 'Carignan', price: 80, type: 'Rouge' },
+  { id: 'domaine-de-montcalmes', category: 'rouges', subcategory: 'Languedoc-Roussillon', order: 32, name: 'Domaine de Montcalmès', appellation: 'Terrasses du Larzac', region: 'Languedoc-Roussillon', vintage: 2022, grape: 'Syrah, Mourvèdre, Grenache', price: 80, type: 'Rouge' },
+  { id: 'jadis-leon-barral', category: 'rouges', subcategory: 'Languedoc-Roussillon', order: 33, name: 'Jadis', producer: 'domaine Léon Barral', appellation: 'Faugères', region: 'Languedoc-Roussillon', vintage: 2021, grape: 'Carignan, Syrah, Grenache', price: 88, type: 'Rouge' },
+  { id: 'cuvee-rose-magnon', category: 'rouges', subcategory: 'Languedoc-Roussillon', order: 34, name: 'Cuvée Rose', producer: 'Maxime Magnon', appellation: 'Corbières', region: 'Languedoc-Roussillon', vintage: 2019, grape: 'Cinsault', price: 92, type: 'Rouge' },
+  { id: 'autour-de-jonquieres-mas-jullien', category: 'rouges', subcategory: 'Languedoc-Roussillon', order: 35, name: 'Autour de Jonquières', producer: 'Mas Jullien', appellation: 'Terrasses du Larzac', region: 'Languedoc-Roussillon', vintage: 2023, grape: 'Mourvèdre, Carignan, Syrah', price: 92, type: 'Rouge' },
+  { id: 'le-merle-aux-alouettes-chabanon-2013', category: 'rouges', subcategory: 'Languedoc-Roussillon', order: 36, name: 'Le Merle aux Alouettes', producer: 'Alain Chabanon', appellation: "Pays d'Oc", region: 'Languedoc-Roussillon', vintage: 2013, grape: 'Merlot', price: 98, type: 'Rouge' },
+  { id: 'metairie-du-clos-clos-marie', category: 'rouges', subcategory: 'Languedoc-Roussillon', order: 37, name: 'Métairie du Clos', producer: 'Clos Marie', appellation: 'Pic Saint Loup', region: 'Languedoc-Roussillon', vintage: 2009, grape: 'Grenache, Syrah, Carignan', price: 110, type: 'Rouge' },
+  { id: 'la-muntada-gauby', category: 'rouges', subcategory: 'Languedoc-Roussillon', order: 38, name: 'La Muntada', producer: 'domaine Gauby', appellation: 'Côtes Catalanes', region: 'Languedoc-Roussillon', vintage: 2021, grape: 'Grenache, Carignan, Syrah', price: 116, type: 'Rouge' },
+  { id: 'les-garrigues-vaisse', category: 'rouges', subcategory: 'Languedoc-Roussillon', order: 39, name: 'Les Garrigues', producer: 'domaine Vaisse', appellation: "Pays d'Hérault", region: 'Languedoc-Roussillon', vintage: 2019, grape: 'Merlot, Cabernet Sauvignon', price: 118, type: 'Rouge' },
+  { id: 'campagne-de-centeilles-1992-clos-centeilles', category: 'rouges', subcategory: 'Languedoc-Roussillon', order: 40, name: 'Campagne de Centeilles', producer: 'Clos Centeilles', appellation: 'Minervois', region: 'Languedoc-Roussillon', vintage: 1992, grape: 'Cinsault', price: 132, type: 'Rouge' },
+
+  /* --- Vins rouges — Bourgogne --- */
+  { id: 'bourgogne-fanny-sabre', category: 'rouges', subcategory: 'Bourgogne', order: 0, name: 'Bourgogne', producer: 'Fanny Sabre', appellation: 'Bourgogne', region: 'Bourgogne', vintage: 2023, grape: 'Pinot Noir', price: 60, type: 'Rouge' },
+  { id: 'macon-rouge-selection-massale-clos-des-vignes-du-maynes', category: 'rouges', subcategory: 'Bourgogne', order: 1, name: 'Mâcon Rouge « Sélection Massale »', producer: 'Clos des Vignes du Maynes', appellation: 'Mâcon', region: 'Bourgogne', vintage: 2023, grape: 'Gamay', price: 60, type: 'Rouge' },
+  { id: 'sur-le-chene-chevrot-2023', category: 'rouges', subcategory: 'Bourgogne', order: 2, name: '« Sur le Chêne »', producer: 'domaine Chevrot', appellation: 'Maranges', region: 'Bourgogne', vintage: 2023, grape: 'Pinot Noir', price: 64, type: 'Rouge' },
+  { id: 'bourgogne-cote-dor-morey', category: 'rouges', subcategory: 'Bourgogne', order: 3, name: "Bourgogne Côte d'Or", producer: 'Pierre Morey', appellation: "Bourgogne Côte d'Or", region: 'Bourgogne', vintage: 2023, grape: 'Pinot Noir', price: 66, type: 'Rouge' },
+  { id: 'marsannay-pataille', category: 'rouges', subcategory: 'Bourgogne', order: 4, name: 'Marsannay', producer: 'Sylvain Pataille', appellation: 'Marsannay', region: 'Bourgogne', vintage: 2023, grape: 'Pinot Noir', price: 80, type: 'Rouge' },
+  { id: 'monthelie-morey-2022', category: 'rouges', subcategory: 'Bourgogne', order: 5, name: 'Monthélie', producer: 'Pierre Morey', appellation: 'Monthélie', region: 'Bourgogne', vintage: 2022, grape: 'Pinot Noir', price: 80, type: 'Rouge' },
+  { id: 'cuvee-910-clos-des-vignes-du-maynes', category: 'rouges', subcategory: 'Bourgogne', order: 6, name: 'Cuvée 910', producer: 'Clos des Vignes du Maynes', appellation: 'Mâcon Rouge', region: 'Bourgogne', vintage: 2023, grape: 'Pinot Noir, Pinot Fin, Gamay, Gamay Petits Grains, Chardonnay', price: 82, type: 'Rouge' },
+  { id: 'monthelie-morey-2021', category: 'rouges', subcategory: 'Bourgogne', order: 7, name: 'Monthélie', producer: 'Pierre Morey', appellation: 'Monthélie', region: 'Bourgogne', vintage: 2021, grape: 'Pinot Noir', price: 84, type: 'Rouge' },
+  { id: 'marsannay-trapet', category: 'rouges', subcategory: 'Bourgogne', order: 8, name: 'Marsannay', producer: 'domaine Trapet', appellation: 'Marsannay', region: 'Bourgogne', vintage: 2023, grape: 'Pinot Noir', price: 84, type: 'Rouge' },
+  { id: 'monthelie-montille', category: 'rouges', subcategory: 'Bourgogne', order: 9, name: 'Monthélie', producer: 'domaine de Montille', appellation: 'Monthélie', region: 'Bourgogne', vintage: 2023, grape: 'Pinot Noir', price: 84, type: 'Rouge' },
+  { id: 'volnay-javillier', category: 'rouges', subcategory: 'Bourgogne', order: 10, name: 'Volnay', producer: 'domaine Javillier', appellation: 'Volnay', region: 'Bourgogne', vintage: 2022, grape: 'Pinot Noir', price: 96, type: 'Rouge' },
+  { id: 'manganite-clos-des-vignes-du-maynes', category: 'rouges', subcategory: 'Bourgogne', order: 11, name: 'Manganite', producer: 'Clos des Vignes du Maynes', appellation: 'Mâcon-Cruzille', region: 'Bourgogne', vintage: 2022, grape: 'Gamay Petits Grains', price: 98, type: 'Rouge' },
+  { id: 'cuvee-auguste-clos-des-vignes-du-maynes', category: 'rouges', subcategory: 'Bourgogne', order: 12, name: 'Cuvée Auguste', producer: 'Clos des Vignes du Maynes', appellation: 'Bourgogne', region: 'Bourgogne', vintage: 2023, grape: 'Pinot Noir', price: 98, type: 'Rouge' },
+  { id: 'beaune-des-croix', category: 'rouges', subcategory: 'Bourgogne', order: 13, name: 'Beaune', producer: 'domaine des Croix', appellation: 'Beaune', region: 'Bourgogne', vintage: 2023, grape: 'Pinot Noir', price: 100, type: 'Rouge' },
+  { id: 'santenay-clos-des-hates-hubert-lamy', category: 'rouges', subcategory: 'Bourgogne', order: 14, name: 'Santenay « Clos des Hates »', producer: 'domaine Hubert Lamy', appellation: 'Santenay', region: 'Bourgogne', vintage: 2023, grape: 'Pinot Noir', price: 104, type: 'Rouge' },
+  { id: 'chassagne-montrachet-la-goujonne-hubert-lamy', category: 'rouges', subcategory: 'Bourgogne', order: 15, name: 'Chassagne-Montrachet « La Goujonne »', producer: 'domaine Hubert Lamy', appellation: 'Chassagne-Montrachet', region: 'Bourgogne', vintage: 2023, grape: 'Pinot Noir', price: 110, type: 'Rouge' },
+  { id: 'saint-aubin-1er-cru-derriere-chez-edouard-hubert-lamy', category: 'rouges', subcategory: 'Bourgogne', order: 16, name: 'Saint-Aubin 1er Cru « Derrière chez Edouard »', producer: 'domaine Hubert Lamy', appellation: 'Saint-Aubin 1er Cru', region: 'Bourgogne', vintage: 2023, grape: 'Pinot Noir', price: 120, type: 'Rouge' },
+  { id: 'pommard-1er-cru-javillier', category: 'rouges', subcategory: 'Bourgogne', order: 17, name: 'Pommard 1er Cru', producer: 'domaine Javillier', appellation: 'Pommard 1er Cru', region: 'Bourgogne', vintage: 2022, grape: 'Pinot Noir', price: 132, type: 'Rouge' },
+  { id: 'nuits-saint-georges-aux-saints-juliens-montille', category: 'rouges', subcategory: 'Bourgogne', order: 18, name: 'Nuits-Saint-Georges « Aux Saints-Juliens »', producer: 'domaine de Montille', appellation: 'Nuits-Saint-Georges', region: 'Bourgogne', vintage: 2022, grape: 'Pinot Noir', price: 134, type: 'Rouge' },
+  { id: 'savigny-les-beaune-1er-cru-les-peuillets-des-croix', category: 'rouges', subcategory: 'Bourgogne', order: 19, name: 'Savigny-Lès-Beaune 1er Cru « Les Peuillets »', producer: 'domaine des Croix', appellation: 'Savigny-Lès-Beaune 1er Cru', region: 'Bourgogne', vintage: 2023, grape: 'Pinot Noir', price: 136, type: 'Rouge' },
+  { id: 'volnay-1er-cru-clos-des-chenes-javillier', category: 'rouges', subcategory: 'Bourgogne', order: 20, name: 'Volnay 1er Cru « Clos des Chênes »', producer: 'domaine Javillier', appellation: 'Volnay 1er Cru', region: 'Bourgogne', vintage: 2022, grape: 'Pinot Noir', price: 136, type: 'Rouge' },
+  { id: 'beaune-1er-cru-les-cents-vignes-des-croix', category: 'rouges', subcategory: 'Bourgogne', order: 21, name: 'Beaune 1er Cru « Les Cents Vignes »', producer: 'domaine des Croix', appellation: 'Beaune 1er Cru', region: 'Bourgogne', vintage: 2023, grape: 'Pinot Noir', price: 139, type: 'Rouge' },
+  { id: 'volnay-pitures-1er-cru-morey-blanc', category: 'rouges', subcategory: 'Bourgogne', order: 22, name: 'Volnay Pitures 1er Cru', producer: 'domaine Morey Blanc', appellation: 'Volnay 1er Cru', region: 'Bourgogne', vintage: 2022, grape: 'Pinot Noir', price: 142, type: 'Rouge' },
+  { id: 'aloxe-corton-1er-cru-les-vercots-morey', category: 'rouges', subcategory: 'Bourgogne', order: 23, name: 'Aloxe-Corton 1er Cru « Les Vercots »', producer: 'Pierre Morey', appellation: 'Aloxe-Corton 1er Cru', region: 'Bourgogne', vintage: '2021/2022', grape: 'Pinot Noir', price: 152, type: 'Rouge' },
+  { id: 'beaune-1er-cru-les-greves-montille', category: 'rouges', subcategory: 'Bourgogne', order: 24, name: 'Beaune 1er Cru « Les Grèves »', producer: 'domaine de Montille', appellation: 'Beaune 1er Cru', region: 'Bourgogne', vintage: 2022, grape: 'Pinot Noir', price: 156, type: 'Rouge' },
+  { id: 'santenay-1er-cru-clos-des-gravieres-hubert-lamy', category: 'rouges', subcategory: 'Bourgogne', order: 25, name: 'Santenay 1er Cru Clos des Gravières', producer: 'domaine Hubert Lamy', appellation: 'Santenay 1er Cru', region: 'Bourgogne', vintage: 2023, grape: 'Pinot Noir', price: 162, type: 'Rouge' },
+  { id: '1869-trapet-standard', category: 'rouges', subcategory: 'Bourgogne', order: 26, name: '1869', producer: 'domaine Trapet', appellation: 'Gevrey-Chambertin', region: 'Bourgogne', vintage: 2022, grape: 'Pinot Noir', price: 178, type: 'Rouge' },
+  { id: 'volnay-1er-cru-les-champans-montille', category: 'rouges', subcategory: 'Bourgogne', order: 27, name: 'Volnay 1er Cru « Les Champans »', producer: 'domaine de Montille', appellation: 'Volnay 1er Cru', region: 'Bourgogne', vintage: 2022, grape: 'Pinot Noir', price: 240, type: 'Rouge' },
+  { id: 'clos-de-vougeot-grand-cru-millot', category: 'rouges', subcategory: 'Bourgogne', order: 28, name: 'Clos de Vougeot Grand Cru', producer: 'domaine JM Millot', appellation: 'Clos de Vougeot Grand Cru', region: 'Bourgogne', vintage: 2013, grape: 'Pinot Noir', price: 248, type: 'Rouge' },
+  { id: 'volnay-1er-cru-les-taillepieds-montille', category: 'rouges', subcategory: 'Bourgogne', order: 29, name: 'Volnay 1er Cru « Les Taillepieds »', producer: 'domaine de Montille', appellation: 'Volnay 1er Cru', region: 'Bourgogne', vintage: 2022, grape: 'Pinot Noir', price: 268, type: 'Rouge' },
+  { id: 'pommard-1er-cru-les-pezerolles-montille', category: 'rouges', subcategory: 'Bourgogne', order: 30, name: 'Pommard 1er Cru « Les Pezerolles »', producer: 'domaine de Montille', appellation: 'Pommard 1er Cru', region: 'Bourgogne', vintage: 2022, grape: 'Pinot Noir', price: 270, type: 'Rouge' },
+  { id: 'corton-grand-cru-clos-du-roi-montille', category: 'rouges', subcategory: 'Bourgogne', order: 31, name: 'Corton Grand Cru « Clos du Roi »', producer: 'domaine de Montille', appellation: 'Corton Grand Cru', region: 'Bourgogne', vintage: 2022, grape: 'Pinot Noir', price: 370, type: 'Rouge' },
+  { id: 'vosne-romanee-1er-cru-les-malconsorts-montille', category: 'rouges', subcategory: 'Bourgogne', order: 32, name: 'Vosne-Romanée 1er Cru « Les Malconsorts »', producer: 'Domaine de Montille', appellation: 'Vosne-Romanée 1er Cru', region: 'Bourgogne', vintage: 2022, grape: 'Pinot Noir', price: 580, type: 'Rouge' },
+
+  /* --- Vins rouges — Jéroboam (5 L) --- */
+  { id: 'esprit-meylet-jeroboam', category: 'rouges', subcategory: 'Jéroboam (5 L)', order: 0, name: 'Esprit Meylet', producer: 'Château Meylet', appellation: 'Saint-Émilion Grand Cru', region: 'Bordeaux', vintage: 2011, grape: 'Merlot, Cabernet Franc', price: 560, volume: 'Jéroboam (5 L)', type: 'Rouge' },
+];
+
 export const defaultData: DbSchema = {
   images: seedImages,
   menu: seedMenu,
+  wines: seedWines,
   meta: { lastPublishedAt: null, lastPublishedCommit: null },
 };
 
@@ -284,6 +648,7 @@ export async function openDb() {
   // que le schéma courant (migration douce, sans jamais effacer de données).
   db.data.images ??= [];
   db.data.menu ??= [];
+  db.data.wines ??= [];
   db.data.meta ??= { lastPublishedAt: null, lastPublishedCommit: null };
   return db;
 }

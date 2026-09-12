@@ -15,10 +15,15 @@ import {
   DATA_DIR,
   GALLERY_ONLY_IMAGE_KEYS,
   SITE_IMAGE_KEYS,
+  WINE_CATEGORY_META,
+  WINE_CATEGORY_ORDER,
+  WINE_SUBCATEGORY_ORDER,
   type Db,
   type DbImage,
   type DbMenuItem,
+  type DbWine,
   type MenuCategoryId,
+  type WineCategoryId,
 } from './db.ts';
 import { toCamelCase } from './slug.ts';
 
@@ -263,21 +268,122 @@ export const allMenuItems: MenuItem[] = menuCategories.flatMap((c) => c.items);
 }
 
 /* -------------------------------------------------------------------------- */
+/*  WINES.TS                                                                   */
+/* -------------------------------------------------------------------------- */
+
+/** Reprend uniquement les champs publics d'un vin, dans l'ordre éditorial habituel. */
+function wineLiteral(wine: DbWine): Record<string, unknown> {
+  return {
+    id: wine.id,
+    name: wine.name,
+    producer: wine.producer,
+    appellation: wine.appellation,
+    region: wine.region,
+    type: wine.type,
+    grape: wine.grape,
+    vintage: wine.vintage,
+    volume: wine.volume,
+    price: wine.price,
+    description: wine.description,
+    byTheGlass: wine.byTheGlass,
+    stock: wine.stock,
+  };
+}
+
+function wineCategoryVarName(category: WineCategoryId): string {
+  return toCamelCase(category);
+}
+
+function generateWinesFile(db: Db): string {
+  const categoryBlocks = WINE_CATEGORY_ORDER.map((category) => {
+    const varName = wineCategoryVarName(category);
+    const subcategoryTitles = WINE_SUBCATEGORY_ORDER[category];
+    const items = db.data.wines.filter((w) => w.category === category);
+
+    if (!subcategoryTitles) {
+      const wines = items.sort((a, b) => a.order - b.order).map((w) => wineLiteral(w));
+      return `export const ${varName}: Wine[] = ${serialize(wines, 1)};`;
+    }
+
+    const groups = subcategoryTitles
+      .map((title) => {
+        const wines = items
+          .filter((w) => w.subcategory === title)
+          .sort((a, b) => a.order - b.order)
+          .map((w) => wineLiteral(w));
+        return { title, wines };
+      })
+      .filter((group) => group.wines.length > 0);
+    return `export const ${varName}: WineSubcategory[] = ${serialize(groups, 1)};`;
+  });
+
+  const categoriesLiteral = WINE_CATEGORY_ORDER.map((category) => {
+    const meta = WINE_CATEGORY_META[category];
+    const varName = wineCategoryVarName(category);
+    const field = WINE_SUBCATEGORY_ORDER[category] ? 'subcategories' : 'wines';
+    return (
+      `  {\n` +
+      `    id: '${category}',\n` +
+      `    title: ${jsString(meta.title)},\n` +
+      `    ${field}: ${varName},\n` +
+      `  },`
+    );
+  }).join('\n');
+
+  return `/**
+ * LA CAVE — L'ALLER RETOUR
+ * ---------------------------------------------------------------------------
+ * ⚠️ FICHIER GÉNÉRÉ — ne pas modifier à la main.
+ * Généré par le tableau de bord (\`npm run dashboard\`) à partir de
+ * \`server/database.json\`. Toute modification directe sera écrasée à la
+ * prochaine publication.
+ */
+
+export type { WineColor, WineCategoryId, WineSubcategory, WineCategory, Wine } from './wines.types';
+import type { Wine, WineSubcategory, WineCategory } from './wines.types';
+
+${categoryBlocks.join('\n\n')}
+
+/* -------------------------------------------------------------------------- */
+/*  ASSEMBLAGE                                                                 */
+/* -------------------------------------------------------------------------- */
+
+export const wineCategories: WineCategory[] = [
+${categoriesLiteral}
+];
+
+/** Toutes les bouteilles, toutes catégories confondues — moteur de recherche/filtres. */
+export const wines: Wine[] = wineCategories.flatMap((c) =>
+  c.wines ? c.wines : c.subcategories!.flatMap((s) => s.wines),
+);
+
+/** Nombre de références réellement présentes dans les données (jamais gonflé). */
+export const wineCount = wines.length;
+`;
+}
+
+/* -------------------------------------------------------------------------- */
 /*  ÉCRITURE                                                                   */
 /* -------------------------------------------------------------------------- */
 
 export interface GeneratedFiles {
   imagesTs: string;
   menuTs: string;
+  winesTs: string;
 }
 
 export function generateFiles(db: Db): GeneratedFiles {
-  return { imagesTs: generateImagesFile(db), menuTs: generateMenuFile(db) };
+  return {
+    imagesTs: generateImagesFile(db),
+    menuTs: generateMenuFile(db),
+    winesTs: generateWinesFile(db),
+  };
 }
 
 export async function writeGeneratedFiles(db: Db): Promise<GeneratedFiles> {
   const files = generateFiles(db);
   await fs.writeFile(path.join(DATA_DIR, 'images.ts'), files.imagesTs, 'utf8');
   await fs.writeFile(path.join(DATA_DIR, 'menu.ts'), files.menuTs, 'utf8');
+  await fs.writeFile(path.join(DATA_DIR, 'wines.ts'), files.winesTs, 'utf8');
   return files;
 }

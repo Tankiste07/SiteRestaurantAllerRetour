@@ -19,12 +19,19 @@ import {
   PHOTOS_DIR,
   SITE_IMAGE_KEYS,
   TONES,
+  WINE_CATEGORY_META,
+  WINE_CATEGORY_ORDER,
+  WINE_COLORS,
+  WINE_SUBCATEGORY_ORDER,
   openDb,
   type DbImage,
   type DbMenuItem,
+  type DbWine,
   type ImageMotif,
   type ImageTone,
   type MenuCategoryId,
+  type WineCategoryId,
+  type WineColor,
 } from './db.ts';
 import { compressToJpeg } from './compress.ts';
 import { previewPublish, publish } from './publish.ts';
@@ -59,6 +66,18 @@ function isCategory(value: unknown): value is MenuCategoryId {
 }
 function isNonEmptyString(value: unknown): value is string {
   return typeof value === 'string' && value.trim().length > 0;
+}
+function isWineCategory(value: unknown): value is WineCategoryId {
+  return typeof value === 'string' && (WINE_CATEGORY_ORDER as string[]).includes(value);
+}
+function isWineColor(value: unknown): value is WineColor {
+  return typeof value === 'string' && (WINE_COLORS as string[]).includes(value);
+}
+/** Un vin de cette catégorie doit avoir l'une des sous-catégories prévues — ni plus, ni moins. */
+function isValidWineSubcategory(category: WineCategoryId, value: unknown): value is string | undefined {
+  const allowed = WINE_SUBCATEGORY_ORDER[category];
+  if (!allowed) return value === undefined;
+  return typeof value === 'string' && allowed.includes(value);
 }
 
 interface RawVariant {
@@ -101,6 +120,10 @@ export function createApp() {
         motifs: MOTIFS,
         siteImageKeys: SITE_IMAGE_KEYS,
         galleryOnlyImageKeys: GALLERY_ONLY_IMAGE_KEYS,
+        wineCategoryMeta: WINE_CATEGORY_META,
+        wineCategoryOrder: WINE_CATEGORY_ORDER,
+        wineSubcategoryOrder: WINE_SUBCATEGORY_ORDER,
+        wineColors: WINE_COLORS,
         lastPublishedAt: db.data.meta.lastPublishedAt,
         lastPublishedCommit: db.data.meta.lastPublishedCommit,
       });
@@ -360,6 +383,179 @@ export function createApp() {
       await db.write();
       res.json(
         db.data.menu.filter((i) => i.category === category).sort((a, b) => a.order - b.order),
+      );
+    }),
+  );
+
+  /* --------------------------------- La Cave --------------------------------- */
+
+  app.get(
+    '/api/wines',
+    asHandler(async (_req, res) => {
+      const db = await dbPromise;
+      res.json(db.data.wines);
+    }),
+  );
+
+  app.post(
+    '/api/wines',
+    asHandler(async (req, res) => {
+      const db = await dbPromise;
+      const body = req.body as Record<string, unknown>;
+
+      if (!isWineCategory(body.category)) throw new ApiError(400, 'Catégorie invalide.');
+      const category = body.category;
+      if (!isValidWineSubcategory(category, body.subcategory)) {
+        throw new ApiError(400, 'Sous-catégorie invalide pour cette catégorie.');
+      }
+      const subcategory = body.subcategory as string | undefined;
+      if (body.type !== undefined && !isWineColor(body.type)) {
+        throw new ApiError(400, 'Type de vin invalide.');
+      }
+
+      const siblings = db.data.wines.filter(
+        (w) => w.category === category && w.subcategory === subcategory,
+      );
+      const order = siblings.length === 0 ? 0 : Math.max(...siblings.map((w) => w.order)) + 1;
+
+      const takenIds = new Set(db.data.wines.map((w) => w.id));
+      const baseName = isNonEmptyString(body.name)
+        ? body.name
+        : isNonEmptyString(body.producer)
+          ? body.producer
+          : 'vin';
+      const id = uniqueAmong(toKebabCase(baseName), takenIds);
+
+      const wine: DbWine = {
+        id,
+        category,
+        subcategory,
+        order,
+        name: isNonEmptyString(body.name) ? body.name : undefined,
+        producer: isNonEmptyString(body.producer) ? body.producer : undefined,
+        appellation: isNonEmptyString(body.appellation) ? body.appellation : undefined,
+        region: isNonEmptyString(body.region) ? body.region : undefined,
+        type: isWineColor(body.type) ? body.type : undefined,
+        grape: isNonEmptyString(body.grape) ? body.grape : undefined,
+        vintage:
+          typeof body.vintage === 'number' || isNonEmptyString(body.vintage)
+            ? body.vintage
+            : undefined,
+        volume: isNonEmptyString(body.volume) ? body.volume : undefined,
+        price: typeof body.price === 'number' ? body.price : undefined,
+        description: isNonEmptyString(body.description) ? body.description : undefined,
+        byTheGlass: body.byTheGlass === true,
+      };
+
+      db.data.wines.push(wine);
+      await db.write();
+      res.status(201).json(wine);
+    }),
+  );
+
+  app.put(
+    '/api/wines/:id',
+    asHandler(async (req, res) => {
+      const db = await dbPromise;
+      const wine = db.data.wines.find((w) => w.id === req.params.id);
+      if (!wine) throw new ApiError(404, 'Vin introuvable.');
+
+      const body = req.body as Record<string, unknown>;
+
+      const nextCategory = body.category !== undefined ? body.category : wine.category;
+      if (!isWineCategory(nextCategory)) throw new ApiError(400, 'Catégorie invalide.');
+      const nextSubcategory = body.subcategory !== undefined ? body.subcategory : wine.subcategory;
+      if (!isValidWineSubcategory(nextCategory, nextSubcategory)) {
+        throw new ApiError(400, 'Sous-catégorie invalide pour cette catégorie.');
+      }
+
+      if (nextCategory !== wine.category || nextSubcategory !== wine.subcategory) {
+        const siblings = db.data.wines.filter(
+          (w) =>
+            w.id !== wine.id && w.category === nextCategory && w.subcategory === nextSubcategory,
+        );
+        wine.order = siblings.length === 0 ? 0 : Math.max(...siblings.map((w) => w.order)) + 1;
+        wine.category = nextCategory;
+        wine.subcategory = nextSubcategory as string | undefined;
+      }
+
+      if (body.name !== undefined) wine.name = isNonEmptyString(body.name) ? body.name : undefined;
+      if (body.producer !== undefined) {
+        wine.producer = isNonEmptyString(body.producer) ? body.producer : undefined;
+      }
+      if (body.appellation !== undefined) {
+        wine.appellation = isNonEmptyString(body.appellation) ? body.appellation : undefined;
+      }
+      if (body.region !== undefined) {
+        wine.region = isNonEmptyString(body.region) ? body.region : undefined;
+      }
+      if (body.type !== undefined) {
+        if (body.type !== null && !isWineColor(body.type)) {
+          throw new ApiError(400, 'Type de vin invalide.');
+        }
+        wine.type = isWineColor(body.type) ? body.type : undefined;
+      }
+      if (body.grape !== undefined) wine.grape = isNonEmptyString(body.grape) ? body.grape : undefined;
+      if (body.vintage !== undefined) {
+        wine.vintage =
+          typeof body.vintage === 'number' || isNonEmptyString(body.vintage)
+            ? body.vintage
+            : undefined;
+      }
+      if (body.volume !== undefined) {
+        wine.volume = isNonEmptyString(body.volume) ? body.volume : undefined;
+      }
+      if (body.price !== undefined) {
+        wine.price = typeof body.price === 'number' ? body.price : undefined;
+      }
+      if (body.description !== undefined) {
+        wine.description = isNonEmptyString(body.description) ? body.description : undefined;
+      }
+      if (body.byTheGlass !== undefined) wine.byTheGlass = body.byTheGlass === true;
+
+      await db.write();
+      res.json(wine);
+    }),
+  );
+
+  app.delete(
+    '/api/wines/:id',
+    asHandler(async (req, res) => {
+      const db = await dbPromise;
+      const index = db.data.wines.findIndex((w) => w.id === req.params.id);
+      if (index === -1) throw new ApiError(404, 'Vin introuvable.');
+      db.data.wines.splice(index, 1);
+      await db.write();
+      res.status(204).end();
+    }),
+  );
+
+  app.post(
+    '/api/wines/reorder',
+    asHandler(async (req, res) => {
+      const db = await dbPromise;
+      const { category, subcategory, orderedIds } = req.body as {
+        category?: unknown;
+        subcategory?: unknown;
+        orderedIds?: unknown;
+      };
+      if (!isWineCategory(category) || !Array.isArray(orderedIds)) {
+        throw new ApiError(400, 'Paramètres de réorganisation invalides.');
+      }
+      if (!isValidWineSubcategory(category, subcategory)) {
+        throw new ApiError(400, 'Sous-catégorie invalide pour cette catégorie.');
+      }
+      orderedIds.forEach((id, index) => {
+        const wine = db.data.wines.find(
+          (w) => w.id === id && w.category === category && w.subcategory === subcategory,
+        );
+        if (wine) wine.order = index;
+      });
+      await db.write();
+      res.json(
+        db.data.wines
+          .filter((w) => w.category === category && w.subcategory === subcategory)
+          .sort((a, b) => a.order - b.order),
       );
     }),
   );

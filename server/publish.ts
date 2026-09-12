@@ -17,7 +17,12 @@ const run = promisify(execFile);
 
 const ROOT = path.join(SERVER_DIR, '..');
 
-const TRACKED_PATHS = ['src/data/images.ts', 'src/data/menu.ts', 'src/assets/photos'];
+const TRACKED_PATHS = [
+  'src/data/images.ts',
+  'src/data/menu.ts',
+  'src/data/wines.ts',
+  'src/assets/photos',
+];
 
 async function git(args: string[]): Promise<string> {
   const { stdout } = await run('git', args, { cwd: ROOT, maxBuffer: 1024 * 1024 * 20 });
@@ -37,7 +42,13 @@ export async function previewPublish(): Promise<PublishPreview> {
   await writeGeneratedFiles(db);
 
   const status = (await git(['status', '--porcelain', '--', ...TRACKED_PATHS])).trim();
-  const diff = await git(['diff', '--', 'src/data/images.ts', 'src/data/menu.ts']);
+  const diff = await git([
+    'diff',
+    '--',
+    'src/data/images.ts',
+    'src/data/menu.ts',
+    'src/data/wines.ts',
+  ]);
 
   return { changed: status.length > 0, status, diff };
 }

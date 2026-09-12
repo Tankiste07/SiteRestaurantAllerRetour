@@ -8,12 +8,15 @@
 import type {
   DbImage,
   DbMenuItem,
+  DbWine,
   ImageMotif,
   ImageTone,
   MenuCategoryId,
+  WineCategoryId,
+  WineColor,
 } from '../../server/db.ts';
 
-export type { DbImage, DbMenuItem, ImageMotif, ImageTone, MenuCategoryId };
+export type { DbImage, DbMenuItem, DbWine, ImageMotif, ImageTone, MenuCategoryId, WineCategoryId, WineColor };
 
 const API_BASE = 'http://localhost:4310/api';
 
@@ -47,6 +50,10 @@ export interface Meta {
   motifs: ImageMotif[];
   siteImageKeys: string[];
   galleryOnlyImageKeys: string[];
+  wineCategoryMeta: Record<WineCategoryId, { title: string }>;
+  wineCategoryOrder: WineCategoryId[];
+  wineSubcategoryOrder: Partial<Record<WineCategoryId, string[]>>;
+  wineColors: WineColor[];
   lastPublishedAt: string | null;
   lastPublishedCommit: string | null;
 }
@@ -126,6 +133,56 @@ export const reorderCategory = (category: MenuCategoryId, orderedIds: string[]) 
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ category, orderedIds }),
+  });
+
+/* -------------------------------------------------------------------------- */
+/*  LA CAVE                                                                    */
+/* -------------------------------------------------------------------------- */
+
+export const getWines = () => request<DbWine[]>('/wines');
+
+export interface WineInput {
+  category: WineCategoryId;
+  subcategory?: string;
+  name?: string;
+  producer?: string;
+  appellation?: string;
+  region?: string;
+  type?: WineColor;
+  grape?: string;
+  vintage?: string | number;
+  volume?: string;
+  price?: number;
+  description?: string;
+  byTheGlass?: boolean;
+}
+
+export const createWine = (input: WineInput) =>
+  request<DbWine>('/wines', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input),
+  });
+
+export const updateWine = (id: string, patch: Partial<WineInput>) =>
+  request<DbWine>(`/wines/${encodeURIComponent(id)}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(patch),
+  });
+
+export const deleteWine = (id: string) =>
+  request<void>(`/wines/${encodeURIComponent(id)}`, { method: 'DELETE' });
+
+export const reorderWineBucket = (
+  category: WineCategoryId,
+  subcategory: string | undefined,
+  orderedIds: string[],
+) =>
+  request<DbWine[]>('/wines/reorder', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ category, subcategory, orderedIds }),
   });
 
 /* -------------------------------------------------------------------------- */
