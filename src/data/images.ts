@@ -7,6 +7,7 @@
  * prochaine publication.
  */
 
+import herorestaurantPhoto from '@/assets/photos/herorestaurant-1789229987224.jpg';
 import escargotsPhoto from '@/assets/photos/escargots-1789145967123.jpg';
 import tartareCharolaisPhoto from '@/assets/photos/tartare-charolais.jpg';
 import ongletPhoto from '@/assets/photos/onglet.jpg';
@@ -14,6 +15,7 @@ import noixEntrecoteArgentinePhoto from '@/assets/photos/noix-entrecote-argentin
 import filetPhoto from '@/assets/photos/filet-1789145695440.jpg';
 import coteDeBoeufPhoto from '@/assets/photos/cote-de-boeuf.jpg';
 import fauxFiletPhoto from '@/assets/photos/faux-filet.jpg';
+import galeriesalle1Photo from '@/assets/photos/galeriesalle1-1789229993156.jpg';
 
 export type { ImageTone, ImageMotif, ImageAsset } from './images.types';
 import type { ImageAsset } from './images.types';
@@ -24,7 +26,12 @@ export const IMAGES = {
   heroCave: { alt: 'Bouteilles alignées dans la cave du restaurant', tone: 'cave', motif: 'bouteille' },
   heroCarte: { alt: 'Table dressée avant le service', tone: 'nappe', motif: 'assiette' },
   heroViande: { alt: 'Côte de bœuf saisie sur la braise', tone: 'braise', motif: 'flamme' },
-  heroRestaurant: { alt: "Salle du restaurant L'Aller Retour", tone: 'salle', motif: 'salle' },
+  heroRestaurant: {
+    src: herorestaurantPhoto,
+    alt: "Salle du restaurant L'Aller Retour",
+    tone: 'salle',
+    motif: 'salle',
+  },
   intro: { alt: 'Table de restaurant, viande et verres de vin rouge', tone: 'bois', motif: 'verre' },
   caveTeaser: { alt: 'Rangées de bouteilles dans la cave', tone: 'cave', motif: 'bouteille' },
 
@@ -92,7 +99,12 @@ export const IMAGES = {
   moelleux: { alt: 'Moelleux aux noisettes, praliné amande', tone: 'bois', motif: 'dessert' },
 
   /* --- Galerie --- */
-  galerieSalle1: { alt: 'Salle du restaurant', tone: 'salle', motif: 'salle' },
+  galerieSalle1: {
+    src: galeriesalle1Photo,
+    alt: 'Salle du restaurant',
+    tone: 'salle',
+    motif: 'salle',
+  },
   galerieSalle2: { alt: 'Comptoir et banquettes', tone: 'bois', motif: 'salle' },
   galerieSalle3: { alt: 'Table dressée', tone: 'nappe', motif: 'assiette' },
   galerieViande1: { alt: 'Pièce de bœuf grillée', tone: 'braise', motif: 'steak' },
