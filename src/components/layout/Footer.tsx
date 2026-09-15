@@ -28,7 +28,7 @@ export function Footer() {
       <div className="u-container relative z-10 py-16 md:py-20">
         {/* ---------------- Bandeau haut : signature + réservation --------- */}
         <div className="flex flex-col items-center gap-8 text-center">
-          <Logo asText minimal={false} />
+          <Logo asText minimal={false} badgeSize="lg" />
           <p className="max-w-md text-sm leading-relaxed text-sable">
             Viandes d'exception, cave de plus de {CELLAR.announcedReferences} références.
           </p>

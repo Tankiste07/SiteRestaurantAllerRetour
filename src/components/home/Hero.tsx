@@ -1,7 +1,9 @@
 import { ArrowDown } from 'lucide-react';
 import { IMAGES } from '@/data/images';
 import { CELLAR } from '@/data/site';
+import { PARTNER_SITES } from '@/data/partners';
 import { useParallax } from '@/hooks/useParallax';
+import { cn } from '@/utils/cn';
 import { ReservationButton } from '../ReservationButton';
 import { Button } from '../ui/Button';
 import { SmartImage } from '../ui/SmartImage';
@@ -48,6 +50,42 @@ export function Hero() {
               'radial-gradient(70% 55% at 18% 92%, rgba(125,22,38,0.35) 0%, rgba(125,22,38,0) 62%)',
           }}
         />
+      </div>
+
+      {/* ---------------- Adresses amies (bord gauche) ---------------- */}
+      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 hidden w-44 items-center justify-center lg:flex xl:w-56">
+        <ul className="pointer-events-auto flex flex-col items-center gap-8">
+          {PARTNER_SITES.map((site, index) => (
+            <li
+              key={site.id}
+              className="motion-safe:animate-[ar-fade-up_1s_cubic-bezier(0.22,1,0.36,1)_both]"
+              style={{ animationDelay: `${1.1 + index * 0.15}s` }}
+            >
+              <a
+                href={site.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Voir le site de ${site.name} (nouvel onglet)`}
+                title={site.name}
+                className={cn(
+                  'group flex size-28 items-center justify-center rounded-full border border-or/40 shadow-[0_18px_40px_-16px_rgba(0,0,0,0.7)] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:scale-105 hover:border-or xl:size-32',
+                  site.icon ? 'bg-creme p-4' : 'bg-noir/40 backdrop-blur-sm',
+                )}
+              >
+                {site.icon ? (
+                  <img src={site.icon} alt="" className="h-full w-full object-contain" />
+                ) : (
+                  <span
+                    aria-hidden="true"
+                    className="font-display text-lg text-or/75 transition-colors duration-500 group-hover:text-or-clair"
+                  >
+                    {site.name.charAt(0)}
+                  </span>
+                )}
+              </a>
+            </li>
+          ))}
+        </ul>
       </div>
 
       {/* ---------------- Contenu ---------------- */}
